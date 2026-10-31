@@ -2616,5 +2616,108 @@
     // Initialize Default View
     applyLanguage('ru');
   </script>
-</body>
+</body><!-- Скрытое модальное окно Админ-панели -->
+<div id="admin-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg text-white shadow-2xl relative max-h-[90vh] flex flex-col">
+    <div class="flex justify-between items-center pb-3 border-b border-white/10 mb-4">
+      <h3 class="text-lg font-bold text-amber-400">Панель управления M.M.M</h3>
+      <button onclick="closeAdminModal()" class="text-slate-400 hover:text-white text-xl">✕</button>
+    </div>
+    
+    <!-- Авторизация -->
+    <div id="admin-auth" class="space-y-4">
+      <p class="text-sm text-slate-300">Введите PIN-код администратора для доступа к заказам:</p>
+      <input type="password" id="admin-pin" placeholder="PIN-код" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-center text-xl tracking-widest text-white outline-none focus:border-amber-500">
+      <button onclick="checkAdminPin()" class="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-600 font-bold text-slate-950">Войти</button>
+      <p id="admin-pin-error" class="text-rose-400 text-xs text-center hidden">Неверный PIN-код!</p>
+    </div>
+
+    <!-- Список заказов -->
+    <div id="admin-dashboard" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
+      <div class="flex justify-between items-center mb-2">
+        <span class="text-xs text-slate-400">Локальная история заявок:</span>
+        <button onclick="clearAdminOrders()" class="text-xs text-rose-400 hover:underline">Очистить список</button>
+      </div>
+      <div id="admin-orders-list" class="space-y-2 text-xs">
+        <!-- Сюда подгружаются заказы -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Секретный PIN: 7777
+  const ADMIN_SECRET_PIN = "7777";
+
+  function openAdminModal() {
+    const modal = document.getElementById('admin-modal');
+    modal.classList.remove('hidden');
+    document.getElementById('admin-auth').classList.remove('hidden');
+    document.getElementById('admin-dashboard').classList.add('hidden');
+    document.getElementById('admin-pin').value = '';
+    document.getElementById('admin-pin-error').classList.add('hidden');
+  }
+
+  function closeAdminModal() {
+    document.getElementById('admin-modal').classList.add('hidden');
+  }
+
+  function checkAdminPin() {
+    const pin = document.getElementById('admin-pin').value;
+    if (pin === ADMIN_SECRET_PIN) {
+      document.getElementById('admin-auth').classList.add('hidden');
+      document.getElementById('admin-dashboard').classList.remove('hidden');
+      renderAdminOrders();
+    } else {
+      document.getElementById('admin-pin-error').classList.remove('hidden');
+    }
+  }
+
+  function renderAdminOrders() {
+    const list = document.getElementById('admin-orders-list');
+    const orders = JSON.parse(localStorage.getItem('mmm_orders_history') || '[]');
+    
+    if (orders.length === 0) {
+      list.innerHTML = '<div class="p-4 text-center text-slate-500 border border-dashed border-slate-800 rounded-xl">Новых локальных заказов пока нет.<br>Все оформленные заявки отправляются прямо в Telegram-бот.</div>';
+      return;
+    }
+
+    list.innerHTML = orders.map((o, idx) => `
+      <div class="p-3 bg-slate-800/80 border border-slate-700 rounded-xl space-y-1">
+        <div class="flex justify-between font-bold text-amber-300">
+          <span>#${idx + 1} ${o.service || 'Заказ'}</span>
+          <span class="text-slate-400 font-normal">${o.time || ''}</span>
+        </div>
+        <div class="text-slate-200">Клиент: <b>${o.contact || o.user || '—'}</b></div>
+        <div class="text-slate-300">Сумма / Детали: ${o.details || o.amount || '—'}</div>
+      </div>
+    `).reverse().join('');
+  }
+
+  function clearAdminOrders() {
+    if (confirm('Очистить локальный список заказов?')) {
+      localStorage.removeItem('mmm_orders_history');
+      renderAdminOrders();
+    }
+  }
+
+  // Привязка клика по шапке/логотипу
+  let logoClicks = 0;
+  let clickTimer = null;
+  document.addEventListener('DOMContentLoaded', () => {
+    const headerTitle = document.querySelector('header h1') || document.querySelector('header');
+    if (headerTitle) {
+      headerTitle.style.cursor = 'pointer';
+      headerTitle.addEventListener('click', () => {
+        logoClicks++;
+        clearTimeout(clickTimer);
+        clickTimer = setTimeout(() => { logoClicks = 0; }, 1200);
+        if (logoClicks >= 3) {
+          logoClicks = 0;
+          openAdminModal();
+        }
+      });
+    }
+  });
+</script>
 </html>
