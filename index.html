@@ -8,7 +8,7 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts: Plus Jakarta Sans, Outfit, JetBrains Mono -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -85,19 +85,18 @@
 </head>
 <body class="min-h-screen flex flex-col pb-28 relative overflow-x-hidden">
 
-  <!-- Dynamic Starry Sky Canvas -->
+  <!-- Canvas Звездное небо -->
   <canvas id="starfield-canvas" class="fixed inset-0 pointer-events-none z-0 w-full h-full"></canvas>
 
-  <!-- Ambient Glow Orbs -->
+  <!-- Свечение -->
   <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
     <div class="ambient-glow-1 absolute -top-24 left-1/2 -translate-x-1/2 w-[480px] h-[350px] bg-gradient-to-b from-amber-500/20 via-yellow-500/10 to-transparent rounded-full blur-[100px]"></div>
     <div class="ambient-glow-2 absolute top-[35%] -left-28 w-[360px] h-[360px] bg-purple-600/12 rounded-full blur-[100px]"></div>
     <div class="ambient-glow-1 absolute top-[65%] -right-28 w-[360px] h-[360px] bg-amber-500/12 rounded-full blur-[100px]"></div>
   </div>
 
-  <!-- Top Navigation Bar -->
+  <!-- Шапка сайта (Тройной клик по логотипу открывает админ-панель) -->
   <header class="sticky top-0 z-30 backdrop-blur-xl bg-[#090d15]/90 border-b border-amber-500/20 px-4 py-3 flex items-center justify-between shadow-2xl">
-    <!-- Brand Logo & Name (тройной клик открывает панель) -->
     <div class="flex items-center gap-2.5 cursor-pointer" id="brand-header-trigger">
       <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 via-amber-400 to-yellow-200 p-[1.5px] shadow-lg shadow-amber-500/20">
         <div class="w-full h-full bg-[#090d15] rounded-[10px] flex items-center justify-center font-black text-xs text-amber-400 tracking-wider brand-font">
@@ -113,7 +112,7 @@
       </div>
     </div>
 
-    <!-- Controls: Language & Modals -->
+    <!-- Кнопки: Языки и Модалки -->
     <div class="flex items-center gap-2">
       <div class="flex items-center bg-[#131b29] p-0.5 rounded-xl border border-amber-500/30 text-[11px] font-bold">
         <button id="lang-ru" class="px-2 py-1 rounded-lg bg-amber-500 text-slate-950 shadow transition">RU</button>
@@ -132,10 +131,10 @@
     </div>
   </header>
 
-  <!-- Main Container -->
+  <!-- Основной контейнер -->
   <main class="flex-1 max-w-lg w-full mx-auto p-4 space-y-4 relative z-10">
 
-    <!-- Promo Banner -->
+    <!-- Промо-баннер -->
     <section class="p-4 rounded-3xl luxury-card border-amber-500/30 relative overflow-hidden">
       <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
       <div class="flex items-center justify-between relative z-10">
@@ -154,7 +153,7 @@
       </div>
     </section>
 
-    <!-- Main Navigation Tabs -->
+    <!-- Главная навигация -->
     <nav class="flex items-center gap-1.5 p-1.5 bg-[#101725]/90 rounded-2xl border border-amber-500/20 backdrop-blur-md overflow-x-auto no-scrollbar">
       <button id="tab-premium" class="flex-1 min-w-[76px] py-2 px-2 rounded-xl font-extrabold text-[11px] sm:text-xs transition-all duration-300 flex items-center justify-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-lg shadow-amber-500/25 whitespace-nowrap">
         <span>⚡️</span> <span id="label-tab-premium">Premium</span>
@@ -170,7 +169,7 @@
       </button>
     </nav>
 
-    <!-- SECTION 1: Telegram Premium Tab -->
+    <!-- ВКЛАДКА 1: Telegram Premium -->
     <div id="content-premium" class="space-y-4">
       <div class="flex items-center justify-between p-1 bg-[#0c121e] rounded-xl border border-slate-800 text-xs">
         <button id="subtab-no-login" class="flex-1 py-2 px-2 rounded-lg font-bold transition text-center bg-[#172236] text-amber-300 border border-amber-500/30 shadow-md">
@@ -200,7 +199,7 @@
       <div id="premium-cards-container" class="space-y-3"></div>
     </div>
 
-    <!-- SECTION 2: Telegram Stars Tab -->
+    <!-- ВКЛАДКА 2: Telegram Stars -->
     <div id="content-stars" class="hidden space-y-4">
       <div class="p-3.5 rounded-2xl bg-amber-950/25 border border-amber-500/25 text-xs text-amber-200 flex items-start gap-3">
         <span class="text-xl">🌟</span>
@@ -209,12 +208,10 @@
           <span id="desc-stars-body">Для платных постов, подарков, реакций и ботов. Мгновенное начисление по вашему нику.</span>
         </div>
       </div>
-
-      <!-- Stars Grid -->
       <div id="stars-cards-container" class="grid grid-cols-2 gap-3"></div>
     </div>
 
-    <!-- SECTION 3: Auto Service Tab Content -->
+    <!-- ВКЛАДКА 3: Автоуслуги -->
     <div id="content-auto" class="hidden space-y-4">
       <div class="flex items-center justify-between p-1 bg-[#0c121e] rounded-xl border border-slate-800 text-xs">
         <button id="subtab-sober" class="flex-1 py-2 px-1.5 rounded-lg font-bold transition text-center bg-[#172236] text-amber-300 border border-amber-500/30 shadow-md">
@@ -238,7 +235,7 @@
         </p>
       </div>
 
-      <!-- Auto Form -->
+      <!-- Форма заявки авто -->
       <div class="p-4 rounded-3xl luxury-card border-slate-800 space-y-3.5">
         <div class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
           <span>📋</span> <span id="label-auto-form-title">Детали заявки:</span>
@@ -350,7 +347,7 @@
       </div>
     </div>
 
-    <!-- SECTION 4: Handyman / Мастер на дом -->
+    <!-- ВКЛАДКА 4: Мастер на дом -->
     <div id="content-handyman" class="hidden space-y-4">
       <div class="p-4 rounded-3xl luxury-card border-amber-500/30 space-y-2">
         <div class="flex items-center justify-between">
@@ -477,7 +474,7 @@
       </div>
     </div>
 
-    <!-- ON-SITE VISIT SECTION (for Premium & Stars) -->
+    <!-- ВЫЕЗД СПЕЦИАЛИСТА (ДЛЯ PREMIUM И STARS) -->
     <section class="p-4 rounded-3xl luxury-card border-amber-500/30 space-y-3 relative overflow-hidden">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
@@ -557,7 +554,7 @@
       </div>
     </section>
 
-    <!-- QUANTITY & BULK DISCOUNT SELECTOR (For Premium & Stars) -->
+    <!-- КОЛИЧЕСТВО И СКИДКА -->
     <section id="section-quantity" class="p-4 rounded-3xl luxury-card border-slate-800 space-y-3">
       <div class="flex items-center justify-between">
         <div>
@@ -569,7 +566,6 @@
           </p>
         </div>
 
-        <!-- Quantity Stepper Controls -->
         <div class="flex items-center bg-[#0a0f18] border border-slate-700/80 rounded-2xl p-1 gap-2">
           <button type="button" id="btn-qty-minus" class="w-8 h-8 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-black text-sm flex items-center justify-center transition active:scale-95">
             −
@@ -583,7 +579,6 @@
         </div>
       </div>
 
-      <!-- Applied Discount Pill (Hidden if quantity = 1) -->
       <div id="box-discount-applied" class="hidden p-2.5 rounded-2xl bg-emerald-950/30 border border-emerald-500/30 flex items-center justify-between text-xs animate-fade-in">
         <span class="text-emerald-300 font-bold flex items-center gap-1">
           <span>🎉</span> <span id="discount-applied-text">Скидка за объем активирована!</span>
@@ -594,7 +589,7 @@
       </div>
     </section>
 
-    <!-- Recipient Account Section -->
+    <!-- ПОЛУЧАТЕЛЬ -->
     <section class="p-4 rounded-3xl luxury-card border-slate-800 space-y-3">
       <div class="flex items-center justify-between">
         <label id="label-recipient-header" class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
@@ -619,7 +614,7 @@
       </p>
     </section>
 
-    <!-- Payment Method Selector -->
+    <!-- ОПЛАТА -->
     <section class="p-4 rounded-3xl luxury-card border-slate-800 space-y-3">
       <label id="label-pay-method-header" class="text-xs font-bold text-slate-300 block">
         💳 Способ оплаты:
@@ -644,7 +639,7 @@
 
   </main>
 
-  <!-- Sticky Bottom Checkout Bar -->
+  <!-- Нижняя панель оформления -->
   <footer class="fixed bottom-0 left-0 right-0 z-40 p-3 bg-[#080c14]/95 backdrop-blur-xl border-t border-amber-500/25 shadow-2xl">
     <div class="max-w-lg mx-auto flex items-center justify-between gap-3">
       <div class="pl-1">
@@ -659,7 +654,7 @@
     </div>
   </footer>
 
-  <!-- MODAL: Checkout Confirmation -->
+  <!-- МОДАЛКА: Подтверждение заказа -->
   <div id="modal-payment" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 hidden transition-opacity">
     <div class="w-full max-w-md bg-[#0c121e] border border-amber-500/30 rounded-t-3xl sm:rounded-3xl p-5 space-y-4 max-h-[90vh] overflow-y-auto no-scrollbar shadow-2xl">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -724,7 +719,7 @@
     </div>
   </div>
 
-  <!-- MODAL: Orders History (Клиентская) -->
+  <!-- МОДАЛКА: Клиентская история заказов -->
   <div id="modal-history" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
     <div class="w-full max-w-md bg-[#0c121e] border border-amber-500/30 rounded-t-3xl sm:rounded-3xl p-5 space-y-4 max-h-[85vh] flex flex-col shadow-2xl">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -739,7 +734,7 @@
     </div>
   </div>
 
-  <!-- MODAL: FAQ -->
+  <!-- МОДАЛКА: FAQ -->
   <div id="modal-faq" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
     <div class="w-full max-w-md bg-[#0c121e] border border-amber-500/30 rounded-t-3xl sm:rounded-3xl p-5 space-y-4 max-h-[85vh] overflow-y-auto no-scrollbar shadow-2xl">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -757,43 +752,94 @@
     </div>
   </div>
 
-  <!-- MODAL: Скрытая Админ-Панель M.M.M -->
-  <div id="admin-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-amber-500/40 rounded-2xl p-5 w-full max-w-sm text-white shadow-2xl relative max-h-[85vh] flex flex-col">
-      <div class="flex justify-between items-center pb-3 border-b border-white/10 mb-3">
-        <h3 class="text-sm font-bold text-amber-400">Панель управления M.M.M</h3>
-        <button onclick="closeAdminModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
+  <!-- МОДАЛКА: Скрытая Админ-Панель с фильтром по датам и 4 KPI -->
+  <div id="admin-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-3">
+    <div class="bg-[#0c121e] border border-amber-500/40 rounded-3xl p-4 sm:p-5 w-full max-w-md text-white shadow-2xl relative max-h-[92vh] flex flex-col">
+      
+      <!-- Заголовок админки -->
+      <div class="flex justify-between items-center pb-2.5 border-b border-white/10 mb-3">
+        <div>
+          <h3 class="text-sm font-black gold-gradient-text uppercase tracking-wide">Панель управления M.M.M</h3>
+          <p class="text-[10px] text-slate-400">Статистика продаж и учет прибыли</p>
+        </div>
+        <button onclick="closeAdminModal()" class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-sm">✕</button>
       </div>
       
-      <!-- Ввод PIN -->
-      <div id="admin-auth" class="space-y-3">
-        <p class="text-xs text-slate-300">Введите PIN-код администратора:</p>
-        <input type="password" id="admin-pin" placeholder="PIN" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-center text-lg tracking-widest text-white outline-none focus:border-amber-500">
-        <button onclick="checkAdminPin()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-600 font-bold text-xs text-slate-950">Войти</button>
+      <!-- Авторизация по PIN -->
+      <div id="admin-auth" class="space-y-3 py-4">
+        <p class="text-xs text-slate-300 text-center">Введите PIN-код для входа:</p>
+        <input type="password" id="admin-pin" placeholder="••••" maxlength="8" class="w-full bg-slate-900 border border-slate-700 rounded-2xl px-4 py-3 text-center text-2xl tracking-widest text-amber-300 outline-none focus:border-amber-500 font-mono">
+        <button onclick="checkAdminPin()" class="w-full py-3 rounded-2xl gold-btn font-extrabold text-xs uppercase tracking-wider text-slate-950">Войти в систему</button>
         <p id="admin-pin-error" class="text-rose-400 text-xs text-center hidden">Неверный PIN-код!</p>
       </div>
 
-      <!-- Список заказов с бэкенда -->
-      <div id="admin-dashboard" class="hidden flex-1 overflow-y-auto space-y-2 pr-1">
-        <div class="flex justify-between items-center mb-2">
-          <span class="text-[11px] text-slate-400">Заказы на сервере Render:</span>
-          <button onclick="renderAdminOrders()" class="text-[11px] text-amber-400 hover:underline">🔄 Обновить</button>
+      <!-- Основная панель статистики -->
+      <div id="admin-dashboard" class="hidden flex-1 overflow-y-auto space-y-3 pr-1 no-scrollbar">
+        
+        <!-- Выбор периода / выбор дня -->
+        <div class="p-3 rounded-2xl bg-[#070b12] border border-slate-800 space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-slate-400 font-medium">Период выборки:</span>
+            <button onclick="fetchAdminOrders()" class="text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 text-[11px]">
+              <span>🔄</span> Обновить
+            </button>
+          </div>
+          <div class="grid grid-cols-3 gap-1.5 text-[11px]">
+            <button onclick="setPeriodFilter('today')" id="flt-today" class="py-1.5 rounded-xl font-bold bg-amber-500 text-slate-950 transition">Сегодня</button>
+            <button onclick="setPeriodFilter('all')" id="flt-all" class="py-1.5 rounded-xl font-bold bg-slate-800 text-slate-400 hover:text-white transition">Все время</button>
+            <button onclick="setPeriodFilter('custom')" id="flt-custom" class="py-1.5 rounded-xl font-bold bg-slate-800 text-slate-400 hover:text-white transition">Выбрать день 📅</button>
+          </div>
+          <input type="date" id="admin-date-picker" onchange="onCustomDateChange()" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs text-white outline-none focus:border-amber-500 hidden">
         </div>
-        <div id="admin-orders-list" class="space-y-2 text-xs">
-          <!-- Сюда подгружаются заказы с бэкенда -->
+
+        <!-- 4 Сводные Карточки KPI -->
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <!-- 1. Успешные -->
+          <div class="p-3 rounded-2xl bg-emerald-950/20 border border-emerald-500/30">
+            <span class="text-[10px] text-emerald-400 font-bold block mb-0.5">🟢 Успешные:</span>
+            <span id="kpi-done-count" class="text-lg font-black text-white font-mono-num">0</span>
+            <span class="text-[9px] text-slate-400 block mt-0.5">заказов выполнено</span>
+          </div>
+          <!-- 2. Не обработанные -->
+          <div class="p-3 rounded-2xl bg-amber-950/20 border border-amber-500/30">
+            <span class="text-[10px] text-amber-400 font-bold block mb-0.5">🟡 Необработанные:</span>
+            <span id="kpi-new-count" class="text-lg font-black text-amber-300 font-mono-num">0</span>
+            <span class="text-[9px] text-slate-400 block mt-0.5">новых заявок</span>
+          </div>
+          <!-- 3. Отмененные клиентом -->
+          <div class="p-3 rounded-2xl bg-rose-950/20 border border-rose-500/30">
+            <span class="text-[10px] text-rose-400 font-bold block mb-0.5">🔴 Отменены:</span>
+            <span id="kpi-cancelled-count" class="text-lg font-black text-rose-300 font-mono-num">0</span>
+            <span class="text-[9px] text-slate-400 block mt-0.5">клиентом / отказ</span>
+          </div>
+          <!-- 4. Чистая прибыль -->
+          <div class="p-3 rounded-2xl bg-gradient-to-br from-amber-500/10 to-yellow-500/5 border border-amber-500/40">
+            <span class="text-[10px] text-amber-300 font-bold block mb-0.5">💰 Чистая прибыль:</span>
+            <span id="kpi-net-profit" class="text-base font-black gold-gradient-text font-mono-num">0 сум</span>
+            <span class="text-[9px] text-slate-400 block mt-0.5">маржа ~20%</span>
+          </div>
         </div>
+
+        <!-- Список заказов -->
+        <div class="pt-2">
+          <div class="text-[11px] font-bold text-slate-300 mb-2 flex items-center justify-between">
+            <span>Список заказов (<span id="filtered-orders-total">0</span>):</span>
+          </div>
+          <div id="admin-orders-list" class="space-y-2.5 text-xs"></div>
+        </div>
+
       </div>
     </div>
   </div>
 
-  <!-- Toast -->
+  <!-- Toast всплывающее сообщение -->
   <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs shadow-2xl flex items-center gap-2 opacity-0 pointer-events-none transition-all duration-300 border border-amber-300">
     <span id="toast-icon">✅</span>
     <span id="toast-text">Действие выполнено</span>
   </div>
 
   <script>
-    // Бэкенд Render и пин-код
+    // Конфигурация бэкенда Render
     const BACKEND_URL = "https://mmm-store-app.onrender.com";
     const ADMIN_SECRET_PIN = "7777";
 
@@ -807,7 +853,7 @@
       } catch (e) {}
     }
 
-    // Функция гарантированной отправки на сервер Render
+    // Отправка заказа прямо в SQLite на Render
     async function sendOrderToServer(serviceName, details, contact) {
       try {
         await fetch(`${BACKEND_URL}/api/order`, {
@@ -820,7 +866,7 @@
           })
         });
       } catch (err) {
-        console.error("Ошибка отправки заказа на Render:", err);
+        console.error("Ошибка сети:", err);
       }
     }
 
@@ -2314,7 +2360,6 @@
         modalPayment.classList.add('hidden');
         updateHistoryBadge();
 
-        // Отправляем на Render
         sendOrderToServer(
           hmOrder.item,
           `Оплата: по договоренности | ${hmOrder.route} | Задача: ${descVal}`,
@@ -2357,7 +2402,6 @@
         modalPayment.classList.add('hidden');
         updateHistoryBadge();
 
-        // Отправляем на Render
         sendOrderToServer(
           autoOrder.item,
           `Маршрут: ${autoOrder.route}`,
@@ -2406,7 +2450,6 @@
       modalPayment.classList.add('hidden');
       updateHistoryBadge();
 
-      // Отправляем на Render
       sendOrderToServer(
         newOrder.item,
         `${formatPrice(newOrder.price)} | Оплата: ${newOrder.payment}${newOrder.isVisit ? ' (С выездом)' : ''}`,
@@ -2482,7 +2525,11 @@
       if (e.target === modalFaq) modalFaq.classList.add('hidden');
     });
 
-    // АДМИН-ПАНЕЛЬ
+    // ЛОГИКА АДМИН-ПАНЕЛИ И ФИНАНСОВОЙ АНАЛИТИКИ
+    let allFetchedOrders = [];
+    let currentPeriodFilter = 'today';
+    let selectedCustomDate = '';
+
     function openAdminModal() {
       document.getElementById('admin-modal').classList.remove('hidden');
       document.getElementById('admin-auth').classList.remove('hidden');
@@ -2500,41 +2547,155 @@
       if (pin === ADMIN_SECRET_PIN) {
         document.getElementById('admin-auth').classList.add('hidden');
         document.getElementById('admin-dashboard').classList.remove('hidden');
-        renderAdminOrders();
+        fetchAdminOrders();
       } else {
         document.getElementById('admin-pin-error').classList.remove('hidden');
       }
     }
 
-    async function renderAdminOrders() {
+    async function fetchAdminOrders() {
       const list = document.getElementById('admin-orders-list');
-      list.innerHTML = '<div class="p-3 text-center text-slate-400">Связь с сервером Render...</div>';
+      list.innerHTML = '<div class="p-3 text-center text-slate-400">Загрузка данных с Render...</div>';
 
       try {
         const res = await fetch(`${BACKEND_URL}/api/orders`);
-        const orders = await res.json();
-
-        if (!orders || orders.length === 0) {
-          list.innerHTML = '<div class="p-4 text-center text-slate-500 border border-dashed border-slate-800 rounded-xl">Заказов на сервере пока нет.</div>';
-          return;
-        }
-
-        list.innerHTML = orders.slice().reverse().map((o) => `
-          <div class="p-2.5 bg-slate-800/90 border border-slate-700 rounded-xl space-y-1">
-            <div class="flex justify-between font-bold text-amber-300">
-              <span>#${o.id} ${o.service}</span>
-              <span class="text-slate-400 font-normal text-[10px]">${o.time}</span>
-            </div>
-            <div class="text-slate-200">Детали: <b>${o.details}</b></div>
-            <div class="text-slate-400">Клиент: ${o.contact}</div>
-          </div>
-        `).join('');
+        allFetchedOrders = await res.json();
+        applyAnalyticsFilter();
       } catch (e) {
-        list.innerHTML = '<div class="p-3 text-center text-rose-400">Не удалось загрузить заказы. Проверьте запущен ли сервис на Render.</div>';
+        list.innerHTML = '<div class="p-3 text-center text-rose-400">Не удалось загрузить данные с сервера.</div>';
       }
     }
 
-    // Тройной клик по логотипу для вызова админки
+    function setPeriodFilter(mode) {
+      currentPeriodFilter = mode;
+      const btnToday = document.getElementById('flt-today');
+      const btnAll = document.getElementById('flt-all');
+      const btnCustom = document.getElementById('flt-custom');
+      const datePicker = document.getElementById('admin-date-picker');
+
+      const activeCls = "py-1.5 rounded-xl font-bold bg-amber-500 text-slate-950 transition";
+      const inactiveCls = "py-1.5 rounded-xl font-bold bg-slate-800 text-slate-400 hover:text-white transition";
+
+      btnToday.className = mode === 'today' ? activeCls : inactiveCls;
+      btnAll.className = mode === 'all' ? activeCls : inactiveCls;
+      btnCustom.className = mode === 'custom' ? activeCls : inactiveCls;
+
+      if (mode === 'custom') {
+        datePicker.classList.remove('hidden');
+        if (!selectedCustomDate) {
+          datePicker.value = new Date().toISOString().split('T')[0];
+          selectedCustomDate = datePicker.value;
+        }
+      } else {
+        datePicker.classList.add('hidden');
+      }
+
+      applyAnalyticsFilter();
+    }
+
+    function onCustomDateChange() {
+      selectedCustomDate = document.getElementById('admin-date-picker').value;
+      applyAnalyticsFilter();
+    }
+
+    function applyAnalyticsFilter() {
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      let filtered = allFetchedOrders.filter(o => {
+        const oDate = o.date || (o.time ? o.time.split(' ')[0].split('.').reverse().join('-') : '');
+        if (currentPeriodFilter === 'today') return oDate === todayStr;
+        if (currentPeriodFilter === 'custom') return oDate === selectedCustomDate;
+        return true;
+      });
+
+      let doneCount = 0;
+      let newCount = 0;
+      let cancelledCount = 0;
+      let doneTurnover = 0;
+
+      filtered.forEach(o => {
+        if (o.status === 'done') {
+          doneCount++;
+          doneTurnover += (o.amount || 0);
+        } else if (o.status === 'cancelled') {
+          cancelledCount++;
+        } else {
+          newCount++;
+        }
+      });
+
+      // Расчет чистой прибыли: 20% маржи от суммы выполненных заказов
+      const netProfit = Math.round(doneTurnover * 0.20);
+
+      document.getElementById('kpi-done-count').innerText = doneCount;
+      document.getElementById('kpi-new-count').innerText = newCount;
+      document.getElementById('kpi-cancelled-count').innerText = cancelledCount;
+      document.getElementById('kpi-net-profit').innerText = formatPrice(netProfit);
+      document.getElementById('filtered-orders-total').innerText = filtered.length;
+
+      const list = document.getElementById('admin-orders-list');
+      if (filtered.length === 0) {
+        list.innerHTML = '<div class="p-4 text-center text-slate-500 border border-dashed border-slate-800 rounded-2xl">За выбранный день заказов нет.</div>';
+        return;
+      }
+
+      list.innerHTML = filtered.map(o => {
+        const cleanUsername = (o.contact || '').replace('@', '').trim();
+        const tgChatLink = cleanUsername ? `https://t.me/${cleanUsername}` : null;
+        
+        const statusBadge = o.status === 'done' 
+          ? '<span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-[10px]">✓ Выполнен</span>'
+          : (o.status === 'cancelled' 
+            ? '<span class="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 font-bold text-[10px]">✕ Отменен</span>'
+            : '<span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 font-bold text-[10px]">● Новый</span>');
+
+        return `
+          <div class="p-3 bg-[#080d16] border border-slate-800 rounded-2xl space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-amber-300">#${o.id} ${o.service}</span>
+              ${statusBadge}
+            </div>
+            <div class="text-slate-300 text-xs">Детали: <b>${o.details}</b></div>
+            <div class="text-slate-400 text-[11px] flex justify-between items-center">
+              <span>Клиент: <b class="text-white">${o.contact}</b></span>
+              <span>${o.time || ''}</span>
+            </div>
+            
+            <div class="pt-2 border-t border-slate-800/80 flex items-center gap-1.5">
+              ${tgChatLink ? `
+                <a href="${tgChatLink}" target="_blank" class="flex-1 py-1.5 px-2 bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 border border-blue-500/30 rounded-xl text-center font-bold text-[11px] transition">
+                  💬 Написать
+                </a>
+              ` : ''}
+              <button onclick="changeOrderStatus(${o.id}, 'done')" class="flex-1 py-1.5 px-2 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 border border-emerald-500/30 rounded-xl text-center font-bold text-[11px] transition">
+                🟢 Выполнен
+              </button>
+              <button onclick="changeOrderStatus(${o.id}, 'cancelled')" class="flex-1 py-1.5 px-2 bg-rose-600/20 text-rose-400 hover:bg-rose-600/30 border border-rose-500/30 rounded-xl text-center font-bold text-[11px] transition">
+                🔴 Отменен
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function changeOrderStatus(orderId, newStatus) {
+      try {
+        await fetch(`${BACKEND_URL}/api/order/status`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: orderId, status: newStatus })
+        });
+        const item = allFetchedOrders.find(x => x.id === orderId);
+        if (item) item.status = newStatus;
+        applyAnalyticsFilter();
+        showToast('Статус заказа обновлен', '✅');
+      } catch (err) {
+        showToast('Ошибка смены статуса', '⚠️');
+      }
+    }
+
+    // Тройной клик по шапке для открытия админки
     let headerClicks = 0;
     let headerTimer = null;
     const headerTrigger = document.getElementById('brand-header-trigger');
@@ -2550,7 +2711,7 @@
       });
     }
 
-    // Анимация звездного неба
+    // Canvas звездное небо
     const starCanvas = document.getElementById('starfield-canvas');
     if (starCanvas) {
       const ctx = starCanvas.getContext('2d');
@@ -2757,7 +2918,6 @@
       requestAnimationFrame(animateStarfield);
     }
 
-    // Инициализация интерфейса
     applyLanguage('ru');
   </script>
 </body>
