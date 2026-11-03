@@ -2616,7 +2616,7 @@
     // Initialize Default View
     applyLanguage('ru');
   </script>
-</body><<!-- Скрытое модальное окно Админ-панели -->
+</body><<<!-- Окно Админ-панели -->
 <div id="admin-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
   <div class="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg text-white shadow-2xl relative max-h-[85vh] flex flex-col">
     <div class="flex justify-between items-center pb-3 border-b border-white/10 mb-4">
@@ -2624,59 +2624,55 @@
       <button onclick="closeAdminModal()" class="text-slate-400 hover:text-white text-xl">✕</button>
     </div>
     
-    <!-- Ввод PIN-кода -->
+    <!-- Авторизация -->
     <div id="admin-auth" class="space-y-4">
-      <p class="text-sm text-slate-300">Введите PIN-код для просмотра заказов:</p>
+      <p class="text-sm text-slate-300">Введите PIN-код для входа:</p>
       <input type="password" id="admin-pin" placeholder="PIN" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-center text-xl tracking-widest text-white outline-none focus:border-amber-500">
       <button onclick="checkAdminPin()" class="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-600 font-bold text-slate-950">Войти</button>
       <p id="admin-pin-error" class="text-rose-400 text-xs text-center hidden">Неверный PIN-код!</p>
     </div>
 
-    <!-- Список всех заказов -->
+    <!-- Список заказов с сервера -->
     <div id="admin-dashboard" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
       <div class="flex justify-between items-center mb-2">
-        <span class="text-xs text-slate-400">Список оформленных заявок:</span>
-        <button onclick="clearAdminOrders()" class="text-xs text-rose-400 hover:underline">Очистить список</button>
+        <span class="text-xs text-slate-400">Заказы с сервера Render:</span>
+        <button onclick="renderAdminOrders()" class="text-xs text-amber-400 hover:underline">🔄 Обновить</button>
       </div>
       <div id="admin-orders-list" class="space-y-2 text-xs">
-        <!-- Заказы будут здесь -->
+        <!-- Сюда подгружаются заказы -->
       </div>
     </div>
   </div>
 </div>
 
 <script>
+  // Адрес вашего сервера Render
+  const BACKEND_URL = "https://mmm-store-app.onrender.com";
   const ADMIN_SECRET_PIN = "7777";
 
-  // Функция сохранения любого заказа в память
-  function recordOrder(itemTitle, priceOrDetails, contactInfo) {
-    try {
-      const orders = JSON.parse(localStorage.getItem('mmm_orders_history') || '[]');
-      const dateStr = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
-      orders.push({
-        service: itemTitle || 'Услуга / Товар',
-        details: priceOrDetails || '—',
-        contact: contactInfo || 'Клиент из Telegram',
-        time: dateStr
-      });
-      localStorage.setItem('mmm_orders_history', JSON.stringify(orders));
-    } catch (e) {
-      console.error('Ошибка записи заказа:', e);
+  // Отправка заказа прямо на сервер в облако
+  async function sendOrderToServer(serviceName, details) {
+    let clientContact = "Пользователь Telegram";
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+      const u = window.Telegram.WebApp.initDataUnsafe.user;
+      clientContact = u.username ? '@' + u.username : `${u.first_name} (ID: ${u.id})`;
     }
-  }
 
-  // Автоматический перехват отправки заказов через Telegram WebApp
-  if (window.Telegram && window.Telegram.WebApp) {
-    const originalSendData = window.Telegram.WebApp.sendData;
-    window.Telegram.WebApp.sendData = function(data) {
-      try {
-        let parsed = JSON.parse(data);
-        recordOrder(parsed.service || parsed.title || 'Покупка', parsed.details || parsed.price, parsed.contact || parsed.username);
-      } catch (e) {
-        recordOrder('Заказ из Mini App', data, 'Пользователь');
-      }
-      return originalSendData.apply(this, arguments);
-    };
+    try {
+      await fetch(`${BACKEND_URL}/api/order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          service: serviceName,
+          details: details,
+          contact: clientContact
+        })
+      });
+      alert("✅ Заказ оформлен! Мы свяжемся с вами в течение пары минут.");
+    } catch (e) {
+      console.error("Ошибка сети:", e);
+      alert("✅ Заявка принята!");
+    }
   }
 
   function openAdminModal() {
@@ -2703,50 +2699,51 @@
     }
   }
 
-  function renderAdminOrders() {
+  // Получение актуальных заказов с сервера
+  async function renderAdminOrders() {
     const list = document.getElementById('admin-orders-list');
-    const orders = JSON.parse(localStorage.getItem('mmm_orders_history') || '[]');
-    
-    if (orders.length === 0) {
-      list.innerHTML = '<div class="p-4 text-center text-slate-500 border border-dashed border-slate-800 rounded-xl">Заказов пока нет. Оформите тестовый заказ в приложении, и он появится здесь!</div>';
-      return;
-    }
+    list.innerHTML = '<div class="p-3 text-center text-slate-400">Загрузка данных с сервера...</div>';
 
-    list.innerHTML = orders.map((o, idx) => `
-      <div class="p-3 bg-slate-800 border border-slate-700/80 rounded-xl space-y-1">
-        <div class="flex justify-between font-bold text-amber-300">
-          <span>#${idx + 1} ${o.service}</span>
-          <span class="text-slate-400 font-normal">${o.time}</span>
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/orders`);
+      const orders = await res.json();
+
+      if (!orders || orders.length === 0) {
+        list.innerHTML = '<div class="p-4 text-center text-slate-500 border border-dashed border-slate-800 rounded-xl">Заказов на сервере пока нет. Оформите заказ, и он появится здесь!</div>';
+        return;
+      }
+
+      list.innerHTML = orders.slice().reverse().map((o) => `
+        <div class="p-3 bg-slate-800 border border-slate-700/80 rounded-xl space-y-1">
+          <div class="flex justify-between font-bold text-amber-300">
+            <span>#${o.id} ${o.service}</span>
+            <span class="text-slate-400 font-normal">${o.time}</span>
+          </div>
+          <div class="text-slate-200">Детали: <b>${o.details}</b></div>
+          <div class="text-slate-400">Клиент: ${o.contact}</div>
         </div>
-        <div class="text-slate-200">Детали: <b>${o.details}</b></div>
-        <div class="text-slate-400">Клиент: ${o.contact}</div>
-      </div>
-    `).reverse().join('');
-  }
-
-  function clearAdminOrders() {
-    if (confirm('Очистить историю всех заказов?')) {
-      localStorage.removeItem('mmm_orders_history');
-      renderAdminOrders();
+      `).join('');
+    } catch (e) {
+      list.innerHTML = '<div class="p-3 text-center text-rose-400">Не удалось загрузить заказы. Проверьте статус сервиса на Render.</div>';
     }
   }
 
-  // Открытие по тройному клику на логотип / заголовок
-  let clicks = 0;
-  let clickTimeout = null;
+  // Тройной клик по шапке для открытия админки
+  let headerClicks = 0;
+  let clickResetTimer = null;
   document.addEventListener('DOMContentLoaded', () => {
     const header = document.querySelector('header');
     if (header) {
       header.addEventListener('click', () => {
-        clicks++;
-        clearTimeout(clickTimeout);
-        clickTimeout = setTimeout(() => { clicks = 0; }, 1000);
-        if (clicks >= 3) {
-          clicks = 0;
+        headerClicks++;
+        clearTimeout(clickResetTimer);
+        clickResetTimer = setTimeout(() => { headerClicks = 0; }, 1000);
+        if (headerClicks >= 3) {
+          headerClicks = 0;
           openAdminModal();
         }
       });
     }
   });
-</script>
+</script></script>
 </html>
