@@ -1,194 +1,767 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>M.M.M Store | VIP Services</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>M.M.M Store — VIP Services</title>
+  <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Plus Jakarta Sans, Outfit, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     body {
-      background-color: #0b0f19;
-      color: #f1f5f9;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      user-select: none;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #020409;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.18) 0%, transparent 55%),
+        radial-gradient(circle at 85% 35%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 15% 75%, rgba(30, 58, 138, 0.18) 0%, transparent 55%),
+        radial-gradient(circle at 50% 100%, rgba(245, 158, 11, 0.12) 0%, transparent 50%);
+      background-attachment: fixed;
+      color: #f8fafc;
       -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      position: relative;
     }
-    .gold-gradient {
-      background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+
+    h1, h2, h3, h4, .brand-font, .font-heading {
+      font-family: 'Outfit', sans-serif;
+      letter-spacing: -0.02em;
     }
-    .gold-text {
-      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+
+    .font-mono-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-feature-settings: "tnum" 1;
+    }
+    
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.18; transform: scale(1); }
+      50% { opacity: 0.28; transform: scale(1.05); }
+    }
+    .ambient-glow-1 {
+      animation: pulseGlow 8s ease-in-out infinite;
+    }
+    .ambient-glow-2 {
+      animation: pulseGlow 10s ease-in-out infinite reverse;
+    }
+    .luxury-card {
+      background: linear-gradient(145deg, rgba(20, 26, 38, 0.9) 0%, rgba(11, 15, 23, 0.95) 100%);
+      border: 1px solid rgba(245, 158, 11, 0.18);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+    .luxury-card:hover {
+      border-color: rgba(245, 158, 11, 0.35);
+    }
+    .luxury-card-selected {
+      background: linear-gradient(145deg, rgba(35, 28, 15, 0.95) 0%, rgba(18, 15, 10, 0.98) 100%);
+      border: 1.5px solid #f59e0b;
+      box-shadow: 0 0 25px -3px rgba(245, 158, 11, 0.35), inset 0 0 15px rgba(245, 158, 11, 0.08);
+    }
+    .gold-gradient-text {
+      background: linear-gradient(135deg, #fef08a 0%, #f59e0b 50%, #d97706 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    .card-luxury {
-      background: rgba(15, 23, 42, 0.75);
-      border: 1px solid rgba(217, 119, 6, 0.2);
-      backdrop-filter: blur(12px);
-      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+    .gold-btn {
+      background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+      color: #0f172a;
+      font-weight: 800;
+      box-shadow: 0 8px 25px -4px rgba(217, 119, 6, 0.45);
     }
-    .card-luxury:active {
+    .gold-btn:active {
       transform: scale(0.98);
-      border-color: rgba(245, 158, 11, 0.5);
+      filter: brightness(0.95);
     }
+    .badge-glow {
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between">
+<body class="min-h-screen flex flex-col pb-28 relative overflow-x-hidden">
 
-  <!-- Header -->
-  <header id="header-logo" class="pt-6 pb-3 px-4 text-center cursor-pointer select-none">
-    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 mb-2">
-      <i class="fa-solid fa-crown text-amber-400 text-xs"></i>
-      <span class="text-[11px] font-bold tracking-widest text-amber-400 uppercase">✦ M · M · M · STORE ✦</span>
+  <!-- Dynamic Starry Sky Canvas -->
+  <canvas id="starfield-canvas" class="fixed inset-0 pointer-events-none z-0 w-full h-full"></canvas>
+
+  <!-- Ambient Glow Orbs -->
+  <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+    <div class="ambient-glow-1 absolute -top-24 left-1/2 -translate-x-1/2 w-[480px] h-[350px] bg-gradient-to-b from-amber-500/20 via-yellow-500/10 to-transparent rounded-full blur-[100px]"></div>
+    <div class="ambient-glow-2 absolute top-[35%] -left-28 w-[360px] h-[360px] bg-purple-600/12 rounded-full blur-[100px]"></div>
+    <div class="ambient-glow-1 absolute top-[65%] -right-28 w-[360px] h-[360px] bg-amber-500/12 rounded-full blur-[100px]"></div>
+  </div>
+
+  <!-- Top Navigation Bar -->
+  <header class="sticky top-0 z-30 backdrop-blur-xl bg-[#090d15]/90 border-b border-amber-500/20 px-4 py-3 flex items-center justify-between shadow-2xl">
+    <!-- Brand Logo & Name (тройной клик открывает панель) -->
+    <div class="flex items-center gap-2.5 cursor-pointer" id="brand-header-trigger">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 via-amber-400 to-yellow-200 p-[1.5px] shadow-lg shadow-amber-500/20">
+        <div class="w-full h-full bg-[#090d15] rounded-[10px] flex items-center justify-center font-black text-xs text-amber-400 tracking-wider brand-font">
+          M.M.M
+        </div>
+      </div>
+      <div>
+        <h1 class="text-sm sm:text-base font-black text-white flex items-center gap-1.5 leading-none brand-font tracking-wide">
+          M.M.M <span class="gold-gradient-text tracking-widest uppercase">STORE</span>
+          <span class="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30 font-mono-num">VIP</span>
+        </h1>
+        <p id="user-greeting" class="text-[10px] text-slate-400 font-medium mt-0.5 tracking-tight">VIP Services & Lounge</p>
+      </div>
     </div>
-    <h1 class="text-2xl font-black tracking-tight gold-text">M.M.M Store</h1>
-    <p class="text-xs text-slate-400 mt-1" id="ui-subtitle">Премиальные цифровые услуги и сервис</p>
-    
-    <!-- Переключатель языков -->
-    <div class="flex justify-center gap-2 mt-3">
-      <button onclick="changeLang('ru')" id="btn-lang-ru" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500 text-slate-950">RU</button>
-      <button onclick="changeLang('uz')" id="btn-lang-uz" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-800 text-slate-400">UZ</button>
+
+    <!-- Controls: Language & Modals -->
+    <div class="flex items-center gap-2">
+      <div class="flex items-center bg-[#131b29] p-0.5 rounded-xl border border-amber-500/30 text-[11px] font-bold">
+        <button id="lang-ru" class="px-2 py-1 rounded-lg bg-amber-500 text-slate-950 shadow transition">RU</button>
+        <button id="lang-uz" class="px-2 py-1 rounded-lg text-slate-400 hover:text-white transition">UZ</button>
+        <button id="lang-en" class="px-2 py-1 rounded-lg text-slate-400 hover:text-white transition">EN</button>
+      </div>
+
+      <button id="btn-orders-history" class="w-8 h-8 rounded-xl bg-[#131b29] hover:bg-slate-800 text-slate-300 border border-slate-700/80 flex items-center justify-center text-xs relative transition" title="История заказов">
+        <span>📦</span>
+        <span id="badge-orders-count" class="hidden absolute -top-1 -right-1 px-1 py-0.1 bg-amber-500 text-slate-950 text-[9px] font-black rounded-full">0</span>
+      </button>
+
+      <button id="btn-faq" class="w-8 h-8 rounded-xl bg-[#131b29] hover:bg-slate-800 text-amber-400 border border-slate-700/80 flex items-center justify-center text-xs transition" title="FAQ">
+        ❓
+      </button>
     </div>
   </header>
 
-  <!-- Список услуг и каталога -->
-  <main class="max-w-md mx-auto px-4 py-2 w-full space-y-4 flex-1">
-    
-    <!-- Telegram Premium -->
-    <div class="card-luxury p-4 rounded-2xl">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
-            <i class="fa-solid fa-star"></i>
-          </div>
-          <div>
-            <h3 class="font-bold text-sm text-white">Telegram Premium</h3>
-            <p class="text-[11px] text-slate-400">Подписка без входа в аккаунт</p>
-          </div>
-        </div>
-        <span class="text-[10px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-full border border-blue-500/20">Подарок</span>
-      </div>
-      <div class="grid grid-cols-3 gap-2 text-center text-xs">
-        <button onclick="openCheckout('Telegram Premium (3 мес)', '135 000 сум')" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700">
-          <div class="text-slate-400 text-[10px]">3 мес</div>
-          <div class="font-bold text-amber-400 mt-0.5">135k</div>
-        </button>
-        <button onclick="openCheckout('Telegram Premium (6 мес)', '220 000 сум')" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700">
-          <div class="text-slate-400 text-[10px]">6 мес</div>
-          <div class="font-bold text-amber-400 mt-0.5">220k</div>
-        </button>
-        <button onclick="openCheckout('Telegram Premium (12 мес)', '380 000 сум')" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700">
-          <div class="text-slate-400 text-[10px]">1 год</div>
-          <div class="font-bold text-amber-400 mt-0.5">380k</div>
-        </button>
-      </div>
-    </div>
+  <!-- Main Container -->
+  <main class="flex-1 max-w-lg w-full mx-auto p-4 space-y-4 relative z-10">
 
-    <!-- Telegram Stars -->
-    <div class="card-luxury p-4 rounded-2xl">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center text-yellow-400">
-            <i class="fa-solid fa-sparkles"></i>
-          </div>
-          <div>
-            <h3 class="font-bold text-sm text-white">Telegram Stars</h3>
-            <p class="text-[11px] text-slate-400">Звёзды для ботов, каналов и подарков</p>
-          </div>
+    <!-- Promo Banner -->
+    <section class="p-4 rounded-3xl luxury-card border-amber-500/30 relative overflow-hidden">
+      <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+      <div class="flex items-center justify-between relative z-10">
+        <div>
+          <span id="banner-tag" class="text-[10px] font-extrabold tracking-widest uppercase text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/30">
+            ПРЕМИАЛЬНЫЙ СЕРВИС
+          </span>
+          <h2 class="text-base sm:text-lg font-black text-white mt-1.5 flex items-center gap-1.5">
+            Telegram & VIP Услуги
+          </h2>
+          <p id="banner-desc" class="text-xs text-slate-300 mt-0.5">
+            Подписки, Stars, Трезвый водитель и Мастер на дом
+          </p>
         </div>
-        <span class="text-[10px] bg-yellow-500/10 text-yellow-400 px-2 py-0.5 rounded-full border border-yellow-500/20">Быстро</span>
+        <div class="text-3xl filter drop-shadow">💎</div>
       </div>
-      <div class="grid grid-cols-3 gap-2 text-center text-xs">
-        <button onclick="openCheckout('Telegram Stars (50 ⭐)', '18 000 сум')" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700">
-          <div class="text-slate-400 text-[10px]">50 ⭐</div>
-          <div class="font-bold text-yellow-400 mt-0.5">18k</div>
-        </button>
-        <button onclick="openCheckout('Telegram Stars (100 ⭐)', '34 000 сум')" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700">
-          <div class="text-slate-400 text-[10px]">100 ⭐</div>
-          <div class="font-bold text-yellow-400 mt-0.5">34k</div>
-        </button>
-        <button onclick="openCheckout('Telegram Stars (500 ⭐)', '165 000 сум')" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700">
-          <div class="text-slate-400 text-[10px]">500 ⭐</div>
-          <div class="font-bold text-yellow-400 mt-0.5">165k</div>
-        </button>
-      </div>
-    </div>
+    </section>
 
-    <!-- Трезвый водитель / Перегон авто -->
-    <div class="card-luxury p-4 rounded-2xl">
-      <div class="flex items-center justify-between mb-2">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-            <i class="fa-solid fa-car-side"></i>
-          </div>
-          <div>
-            <h3 class="font-bold text-sm text-white">Трезвый водитель / Перегон</h3>
-            <p class="text-[11px] text-slate-400">Аккуратный перегон по Ташкенту 24/7</p>
-          </div>
-        </div>
-      </div>
-      <p class="text-[11px] text-slate-400 mb-3">Опытный водитель доставит ваш автомобиль в любую точку в полной безопасности.</p>
-      <button onclick="openCheckout('Трезвый водитель / Перегон', 'По согласованию маршрута')" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg">
-        <i class="fa-solid fa-phone-volume text-xs"></i> Заказать выезд
+    <!-- Main Navigation Tabs -->
+    <nav class="flex items-center gap-1.5 p-1.5 bg-[#101725]/90 rounded-2xl border border-amber-500/20 backdrop-blur-md overflow-x-auto no-scrollbar">
+      <button id="tab-premium" class="flex-1 min-w-[76px] py-2 px-2 rounded-xl font-extrabold text-[11px] sm:text-xs transition-all duration-300 flex items-center justify-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-lg shadow-amber-500/25 whitespace-nowrap">
+        <span>⚡️</span> <span id="label-tab-premium">Premium</span>
       </button>
+      <button id="tab-stars" class="flex-1 min-w-[70px] py-2 px-2 rounded-xl font-extrabold text-[11px] sm:text-xs transition-all duration-300 flex items-center justify-center gap-1 text-slate-400 hover:text-white whitespace-nowrap">
+        <span>🌟</span> <span id="label-tab-stars">Stars</span>
+      </button>
+      <button id="tab-auto" class="flex-1 min-w-[70px] py-2 px-2 rounded-xl font-extrabold text-[11px] sm:text-xs transition-all duration-300 flex items-center justify-center gap-1 text-slate-400 hover:text-white whitespace-nowrap">
+        <span>🚘</span> <span id="label-tab-auto">Авто</span>
+      </button>
+      <button id="tab-handyman" class="flex-1 min-w-[85px] py-2 px-2 rounded-xl font-extrabold text-[11px] sm:text-xs transition-all duration-300 flex items-center justify-center gap-1 text-slate-400 hover:text-white whitespace-nowrap">
+        <span>🛠</span> <span id="label-tab-handyman">Мастер</span>
+      </button>
+    </nav>
+
+    <!-- SECTION 1: Telegram Premium Tab -->
+    <div id="content-premium" class="space-y-4">
+      <div class="flex items-center justify-between p-1 bg-[#0c121e] rounded-xl border border-slate-800 text-xs">
+        <button id="subtab-no-login" class="flex-1 py-2 px-2 rounded-lg font-bold transition text-center bg-[#172236] text-amber-300 border border-amber-500/30 shadow-md">
+          🎁 <span id="label-no-login-tab">Без входа в аккаунт</span>
+        </button>
+        <button id="subtab-with-login" class="flex-1 py-2 px-2 rounded-lg font-bold transition text-center text-slate-400 hover:text-slate-200">
+          🔑 <span id="label-with-login-tab">С входом (дешевле)</span>
+        </button>
+      </div>
+
+      <div id="desc-no-login" class="p-3.5 rounded-2xl bg-[#0f1726]/60 border border-amber-500/20 text-xs text-slate-300 flex items-start gap-3">
+        <span class="text-xl">🛡️</span>
+        <div>
+          <strong id="desc-no-login-title" class="text-white block font-bold mb-0.5">Безопасный подарок по @username</strong>
+          <span id="desc-no-login-body">Пароли не требуются! Подписка отправляется официальным подарком на ваш аккаунт или другу.</span>
+        </div>
+      </div>
+
+      <div id="desc-with-login" class="hidden p-3.5 rounded-2xl bg-purple-950/20 border border-purple-500/30 text-xs text-purple-200 flex items-start gap-3">
+        <span class="text-xl">🔑</span>
+        <div>
+          <strong id="desc-with-login-title" class="text-white block font-bold mb-0.5">Максимальная выгода</strong>
+          <span id="desc-with-login-body">Активация по коду входа через оператора. Можно оформить онлайн или заказать мастера к себе.</span>
+        </div>
+      </div>
+
+      <div id="premium-cards-container" class="space-y-3"></div>
     </div>
 
-    <!-- Муж на час / Мастер на дом -->
-    <div class="card-luxury p-4 rounded-2xl">
-      <div class="flex items-center justify-between mb-2">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
-            <i class="fa-solid fa-screwdriver-wrench"></i>
+    <!-- SECTION 2: Telegram Stars Tab -->
+    <div id="content-stars" class="hidden space-y-4">
+      <div class="p-3.5 rounded-2xl bg-amber-950/25 border border-amber-500/25 text-xs text-amber-200 flex items-start gap-3">
+        <span class="text-xl">🌟</span>
+        <div>
+          <strong id="desc-stars-title" class="text-white block font-bold mb-0.5">Официальные звёзды Telegram</strong>
+          <span id="desc-stars-body">Для платных постов, подарков, реакций и ботов. Мгновенное начисление по вашему нику.</span>
+        </div>
+      </div>
+
+      <!-- Stars Grid -->
+      <div id="stars-cards-container" class="grid grid-cols-2 gap-3"></div>
+    </div>
+
+    <!-- SECTION 3: Auto Service Tab Content -->
+    <div id="content-auto" class="hidden space-y-4">
+      <div class="flex items-center justify-between p-1 bg-[#0c121e] rounded-xl border border-slate-800 text-xs">
+        <button id="subtab-sober" class="flex-1 py-2 px-1.5 rounded-lg font-bold transition text-center bg-[#172236] text-amber-300 border border-amber-500/30 shadow-md">
+          🍷 <span id="label-sober-tab">Трезвый водитель</span>
+        </button>
+        <button id="subtab-service" class="flex-1 py-2 px-1.5 rounded-lg font-bold transition text-center text-slate-400 hover:text-slate-200">
+          ⚡️ <span id="label-service-tab">Прикурить авто</span>
+        </button>
+      </div>
+
+      <div class="p-4 rounded-3xl luxury-card border-amber-500/30 space-y-2">
+        <div class="flex items-center justify-between">
+          <span id="auto-badge-tag" class="text-[9px] font-black px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 uppercase">
+            ТОЛЬКО В ПРИСУТСТВИИ ВЛАДЕЛЬЦА
+          </span>
+          <span class="text-xl" id="auto-service-icon">🍷</span>
+        </div>
+        <h3 id="auto-service-title" class="text-sm font-extrabold text-white">Услуга «Трезвый водитель»</h3>
+        <p id="auto-service-desc" class="text-xs text-slate-300 leading-relaxed">
+          Безопасно довезем вас на вашем авто. Вождение осуществляется строго в присутствии владельца машины. АКПП, МКПП, электромобили.
+        </p>
+      </div>
+
+      <!-- Auto Form -->
+      <div class="p-4 rounded-3xl luxury-card border-slate-800 space-y-3.5">
+        <div class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+          <span>📋</span> <span id="label-auto-form-title">Детали заявки:</span>
+        </div>
+
+        <div class="space-y-2.5">
+          <div>
+            <label id="label-auto-from" class="text-[11px] font-bold text-slate-300 block mb-1">
+              📍 Где находится авто (Точка А):
+            </label>
+            <input 
+              type="text" 
+              id="input-auto-from" 
+              placeholder="Точный адрес, ресторан, парковка или ориентир" 
+              class="w-full bg-[#0a0f18] border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+            >
+          </div>
+          <div id="box-auto-to">
+            <label id="label-auto-to" class="text-[11px] font-bold text-slate-300 block mb-1">
+              🏁 Куда ехать (Точка Б):
+            </label>
+            <input 
+              type="text" 
+              id="input-auto-to" 
+              placeholder="Домашний адрес / парковка / ориентир" 
+              class="w-full bg-[#0a0f18] border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+            >
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+          <div>
+            <label id="label-auto-car" class="text-[11px] font-bold text-slate-300 block mb-1">
+              🚘 Марка и модель авто:
+            </label>
+            <input 
+              type="text" 
+              id="input-auto-car" 
+              placeholder="BYD / Malibu / Tracker / Cobalt" 
+              class="w-full bg-[#0a0f18] border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+            >
+          </div>
+          <div id="box-auto-gearbox">
+            <label id="label-auto-gearbox" class="text-[11px] font-bold text-slate-300 block mb-1">
+              🕹 Коробка передач:
+            </label>
+            <div class="grid grid-cols-2 gap-1.5">
+              <button type="button" id="btn-gear-auto" class="py-2 px-2 rounded-xl text-xs font-bold transition bg-amber-500/20 text-amber-300 border border-amber-500/40 text-center">
+                Автомат (АКПП)
+              </button>
+              <button type="button" id="btn-gear-manual" class="py-2 px-2 rounded-xl text-xs font-bold transition bg-slate-900 border border-slate-800 text-slate-400 hover:text-white text-center">
+                Механика (МКПП)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-1">
+          <label id="label-auto-time" class="text-[11px] font-bold text-slate-300 block mb-1">
+            🕒 Время подачи специалиста:
+          </label>
+          <div class="grid grid-cols-2 gap-2 mb-2">
+            <button type="button" id="btn-time-now" class="py-2 px-3 rounded-xl text-xs font-bold transition bg-amber-500/20 text-amber-300 border border-amber-500/40 text-center shadow-sm">
+              ⚡️ Срочно (15-25 мин)
+            </button>
+            <button type="button" id="btn-time-custom" class="py-2 px-3 rounded-xl text-xs font-bold transition bg-slate-900 border border-slate-800 text-slate-400 hover:text-white text-center">
+              🕒 Ко времени
+            </button>
+          </div>
+          <input 
+            type="text" 
+            id="input-auto-time-val" 
+            placeholder="Например: сегодня к 23:30" 
+            class="w-full bg-[#0a0f18] border border-slate-700/80 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 hidden"
+          >
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 border-t border-slate-800/80">
+          <div>
+            <label class="text-[11px] font-bold text-slate-300 block mb-1">
+              📞 Телефон для связи:
+            </label>
+            <input 
+              type="tel" 
+              id="input-auto-phone" 
+              placeholder="+998 90 123 45 67" 
+              class="w-full bg-[#0a0f18] border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 font-mono"
+            >
           </div>
           <div>
-            <h3 class="font-bold text-sm text-white">Мастер на дом</h3>
-            <p class="text-[11px] text-slate-400">Электрика, сантехника, ремонт мебели</p>
+            <label class="text-[11px] font-bold text-slate-300 block mb-1">
+              💬 Telegram ник:
+            </label>
+            <input 
+              type="text" 
+              id="input-auto-tg" 
+              placeholder="@username" 
+              class="w-full bg-[#0a0f18] border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 font-mono"
+            >
+          </div>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-amber-950/25 border border-amber-500/25 text-xs text-amber-200 flex items-start gap-2.5">
+          <span class="text-base">💬</span>
+          <span id="auto-price-agreement-note" class="text-[11px] leading-relaxed">
+            <strong>Согласование цены:</strong> стоимость поездки согласовывается индивидуально в диалоге или по телефону перед выездом водителя в зависимости от маршрута.
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: Handyman / Мастер на дом -->
+    <div id="content-handyman" class="hidden space-y-4">
+      <div class="p-4 rounded-3xl luxury-card border-amber-500/30 space-y-2">
+        <div class="flex items-center justify-between">
+          <span id="handyman-badge-tag" class="text-[9px] font-black px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 uppercase">
+            ПРОВЕРЕННЫЙ И ОПРЯТНЫЙ СПЕЦИАЛИСТ
+          </span>
+          <span class="text-2xl">🛠</span>
+        </div>
+        <h3 id="handyman-service-title" class="text-sm sm:text-base font-extrabold text-white">Экспресс-мастер на дом («Муж на час»)</h3>
+        <p id="handyman-service-desc" class="text-xs text-slate-300 leading-relaxed">
+          Быстрая и аккуратная помощь в квартире: повесить карниз или зеркало, собрать мебель, починить розетку, заменить смеситель или устранить засор. Со своим набором инструментов.
+        </p>
+      </div>
+
+      <div class="p-4 rounded-3xl luxury-card border-slate-800 space-y-3">
+        <label id="label-handyman-category" class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+          <span>⚙️</span> Что требуется сделать:
+        </label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+          <button type="button" id="btn-hm-mount" class="p-3 rounded-2xl border text-left transition bg-amber-500/20 text-amber-300 border-amber-500/40">
+            <span class="text-lg block mb-1">🔨</span>
+            <strong class="block font-bold text-xs" id="label-hm-mount-title">Монтаж & Карнизы</strong>
+            <span class="text-[10px] text-slate-400 block" id="label-hm-mount-sub">Полки, люстры, зеркала, ТВ</span>
+          </button>
+          <button type="button" id="btn-hm-sanitary" class="p-3 rounded-2xl border text-left transition bg-[#0a0f18] border-slate-700/80 text-slate-300 hover:text-white">
+            <span class="text-lg block mb-1">🚰</span>
+            <strong class="block font-bold text-xs" id="label-hm-san-title">Сантехника</strong>
+            <span class="text-[10px] text-slate-400 block" id="label-hm-san-sub">Смеситель, засор, сифон</span>
+          </button>
+          <button type="button" id="btn-hm-electric" class="p-3 rounded-2xl border text-left transition bg-[#0a0f18] border-slate-700/80 text-slate-300 hover:text-white">
+            <span class="text-lg block mb-1">💡</span>
+            <strong class="block font-bold text-xs" id="label-hm-elec-title">Электрика</strong>
+            <span class="text-[10px] text-slate-400 block" id="label-hm-elec-sub">Розетки, выключатели, свет</span>
+          </button>
+          <button type="button" id="btn-hm-furniture" class="p-3 rounded-2xl border text-left transition bg-[#0a0f18] border-slate-700/80 text-slate-300 hover:text-white">
+            <span class="text-lg block mb-1">🪑</span>
+            <strong class="block font-bold text-xs" id="label-hm-furn-title">Сборка мебели</strong>
+            <span class="text-[10px] text-slate-400 block" id="label-hm-furn-sub">Тумбы, столы, стулья, петли</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-3xl luxury-card border-slate-800 space-y-3.5">
+        <div class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+          <span>📋</span> <span id="label-hm-form-title">Детали вызова мастера:</span>
+        </div>
+
+        <div class="space-y-2.5">
+          <div>
+            <label id="label-hm-address" class="text-[11px] font-bold text-slate-300 block mb-1">
+              📍 Ваш адрес / ориентир в Ташкенте:
+            </label>
+            <input 
+              type="text" 
+              id="input-hm-address" 
+              placeholder="Район, улица, дом, этаж, домофон" 
+              class="w-full bg-[#0a0f18] border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+            >
+          </div>
+          <div>
+            <label id="label-hm-desc" class="text-[11px] font-bold text-slate-300 block mb-1">
+              📝 Кратко опишите задачу (что починить):
+            </label>
+            <textarea 
+              id="input-hm-desc" 
+              rows="2" 
+              placeholder="Например: повесить 2 полки на стену и заменить 1 розетку" 
+              class="w-full bg-[#0a0f18] border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 resize-none"
+            ></textarea>
+          </div>
+        </div>
+
+        <div>
+          <label id="label-hm-time" class="text-[11px] font-bold text-slate-300 block mb-1">
+            🕒 Желаемое время визита:
+          </label>
+          <div class="grid grid-cols-2 gap-2 mb-2">
+            <button type="button" id="btn-hm-time-now" class="py-2 px-3 rounded-xl text-xs font-bold transition bg-amber-500/20 text-amber-300 border border-amber-500/40 text-center shadow-sm">
+              ⚡️ Срочно (30-50 мин)
+            </button>
+            <button type="button" id="btn-hm-time-custom" class="py-2 px-3 rounded-xl text-xs font-bold transition bg-slate-900 border border-slate-800 text-slate-400 hover:text-white text-center">
+              🕒 Ко времени
+            </button>
+          </div>
+          <input 
+            type="text" 
+            id="input-hm-time-val" 
+            placeholder="Например: завтра после 14:00" 
+            class="w-full bg-[#0a0f18] border border-slate-700/80 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 hidden"
+          >
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 border-t border-slate-800/80">
+          <div>
+            <label class="text-[11px] font-bold text-slate-300 block mb-1">
+              📞 Телефон для связи:
+            </label>
+            <input 
+              type="tel" 
+              id="input-hm-phone" 
+              placeholder="+998 90 123 45 67" 
+              class="w-full bg-[#0a0f18] border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 font-mono"
+            >
+          </div>
+          <div>
+            <label class="text-[11px] font-bold text-slate-300 block mb-1">
+              💬 Telegram ник:
+            </label>
+            <input 
+              type="text" 
+              id="input-hm-tg" 
+              placeholder="@username" 
+              class="w-full bg-[#0a0f18] border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 font-mono"
+            >
+          </div>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-amber-950/25 border border-amber-500/25 text-xs text-amber-200 flex items-start gap-2.5">
+          <span class="text-base">💎</span>
+          <span id="hm-price-note" class="text-[11px] leading-relaxed">
+            <strong>Оплата по результату:</strong> мастер оценивает объем работы до начала ремонта. Оплата производится после того, как вы проверите результат лично.
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ON-SITE VISIT SECTION (for Premium & Stars) -->
+    <section class="p-4 rounded-3xl luxury-card border-amber-500/30 space-y-3 relative overflow-hidden">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-xl shadow-inner">
+            🚗
+          </div>
+          <div>
+            <h3 id="label-visit-title" class="text-xs sm:text-sm font-black text-white flex items-center gap-1.5 font-heading">
+              Личный выезд мастера
+              <span class="text-[9px] bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black px-1.5 py-0.2 rounded uppercase font-mono-num">VIP</span>
+            </h3>
+            <p id="label-visit-subtitle" class="text-[11px] text-slate-400">Настроим прямо на вашем телефоне рядом с вами</p>
+          </div>
+        </div>
+
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="toggle-visit" class="sr-only peer">
+          <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-amber-500 peer-checked:to-amber-600"></div>
+        </label>
+      </div>
+
+      <div id="visit-options-box" class="hidden space-y-3.5 pt-3 border-t border-slate-700/60 animate-fade-in">
+        <div class="p-3 rounded-2xl bg-[#0b101a] border border-amber-500/25 space-y-2">
+          <div id="label-schedule-header" class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+            <span>🕒</span> График работы для выездов:
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs">
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+              <span id="label-sched-weekdays" class="text-slate-300">Пн — Пт:</span>
+              <strong id="label-sched-weekdays-val" class="text-emerald-400 font-bold">После 18:00</strong>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+              <span id="label-sched-weekends" class="text-slate-300">Сб — Вс:</span>
+              <strong id="label-sched-weekends-val" class="text-amber-400 font-bold">По договоренности</strong>
+            </div>
+          </div>
+          <p id="label-sched-note" class="text-[11px] text-slate-400 leading-snug">
+            💬 Стоимость дороги (в зависимости от расстояния) и точное время согласовываются в личных сообщениях или по звонку.
+          </p>
+        </div>
+
+        <div class="space-y-2.5">
+          <div>
+            <label id="label-phone" class="text-[11px] font-bold text-slate-300 block mb-1">
+              📞 Ваш номер телефона:
+            </label>
+            <input 
+              type="tel" 
+              id="input-visit-phone" 
+              placeholder="+998 90 123 45 67" 
+              class="w-full bg-[#0a0f18] border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 font-mono"
+            >
+          </div>
+          <div>
+            <label id="label-tg-nick" class="text-[11px] font-bold text-slate-300 block mb-1">
+              💬 Ваш Telegram ник для связи:
+            </label>
+            <input 
+              type="text" 
+              id="input-visit-tg" 
+              placeholder="@username" 
+              class="w-full bg-[#0a0f18] border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 font-mono"
+            >
+          </div>
+          <div>
+            <label id="label-location" class="text-[11px] font-bold text-slate-300 block mb-1">
+              📍 Район или ориентир (место встречи):
+            </label>
+            <input 
+              type="text" 
+              id="input-visit-location" 
+              placeholder="Например: Чиланзар 9 / ориентир метро / БЦ" 
+              class="w-full bg-[#0a0f18] border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+            >
           </div>
         </div>
       </div>
-      <p class="text-[11px] text-slate-400 mb-3">Быстрое решение бытовых задач по Ташкенту и Юнусабадскому району.</p>
-      <button onclick="openCheckout('Мастер на дом', 'Оценка по фото / объёму')" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-xs flex items-center justify-center gap-1.5">
-        <i class="fa-solid fa-calendar-check text-xs text-amber-400"></i> Вызвать специалиста
-      </button>
-    </div>
+    </section>
+
+    <!-- QUANTITY & BULK DISCOUNT SELECTOR (For Premium & Stars) -->
+    <section id="section-quantity" class="p-4 rounded-3xl luxury-card border-slate-800 space-y-3">
+      <div class="flex items-center justify-between">
+        <div>
+          <label id="label-quantity-title" class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+            <span>🎁</span> Количество тарифов:
+          </label>
+          <p id="label-discount-banner" class="text-[10px] text-amber-400 font-semibold mt-0.5">
+            Скидка 5% от 2 шт, 7% от 3 шт, 10% от 5 шт
+          </p>
+        </div>
+
+        <!-- Quantity Stepper Controls -->
+        <div class="flex items-center bg-[#0a0f18] border border-slate-700/80 rounded-2xl p-1 gap-2">
+          <button type="button" id="btn-qty-minus" class="w-8 h-8 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-black text-sm flex items-center justify-center transition active:scale-95">
+            −
+          </button>
+          <span id="quantity-display" class="w-8 text-center font-mono-num font-black text-sm text-white">
+            1
+          </span>
+          <button type="button" id="btn-qty-plus" class="w-8 h-8 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-black text-sm flex items-center justify-center transition active:scale-95 border border-amber-500/30">
+            +
+          </button>
+        </div>
+      </div>
+
+      <!-- Applied Discount Pill (Hidden if quantity = 1) -->
+      <div id="box-discount-applied" class="hidden p-2.5 rounded-2xl bg-emerald-950/30 border border-emerald-500/30 flex items-center justify-between text-xs animate-fade-in">
+        <span class="text-emerald-300 font-bold flex items-center gap-1">
+          <span>🎉</span> <span id="discount-applied-text">Скидка за объем активирована!</span>
+        </span>
+        <strong id="discount-saved-amount" class="text-emerald-400 font-mono-num font-black text-[11px]">
+          -0 сум
+        </strong>
+      </div>
+    </section>
+
+    <!-- Recipient Account Section -->
+    <section class="p-4 rounded-3xl luxury-card border-slate-800 space-y-3">
+      <div class="flex items-center justify-between">
+        <label id="label-recipient-header" class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+          <span>🎯</span> Аккаунт для зачисления подарка:
+        </label>
+        <button id="btn-self-recipient" class="text-[11px] text-amber-400 hover:text-amber-300 font-bold transition">
+          Купить себе
+        </button>
+      </div>
+
+      <div class="relative">
+        <input 
+          type="text" 
+          id="input-recipient" 
+          placeholder="@username" 
+          class="w-full bg-[#0a0f18] border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition font-mono"
+        >
+        <span class="absolute right-3.5 top-2.5 text-slate-500 text-xs">✏️</span>
+      </div>
+      <p id="recipient-helper" class="text-[11px] text-slate-400">
+        Укажите @username человека, которому отправится подарок.
+      </p>
+    </section>
+
+    <!-- Payment Method Selector -->
+    <section class="p-4 rounded-3xl luxury-card border-slate-800 space-y-3">
+      <label id="label-pay-method-header" class="text-xs font-bold text-slate-300 block">
+        💳 Способ оплаты:
+      </label>
+      <div class="grid grid-cols-2 gap-2.5">
+        <button id="pay-card" class="p-3 rounded-2xl border text-left transition flex items-center gap-2.5 bg-amber-500/10 border-amber-500 text-white">
+          <span class="text-xl">💳</span>
+          <div>
+            <div id="pay-card-title" class="text-xs font-bold leading-tight">Карта (перевод)</div>
+            <div class="text-[10px] text-slate-400">Uzcard / Humo</div>
+          </div>
+        </button>
+        <button id="pay-cash" class="p-3 rounded-2xl border text-left transition flex items-center gap-2.5 bg-[#0a0f18] border-slate-700 text-slate-300 hover:text-white">
+          <span class="text-xl">💵</span>
+          <div>
+            <div id="pay-cash-title" class="text-xs font-bold leading-tight">При встрече</div>
+            <div class="text-[10px] text-slate-400" id="cash-desc-text">С выездом</div>
+          </div>
+        </button>
+      </div>
+    </section>
 
   </main>
 
-  <!-- Footer -->
-  <footer class="text-center py-4 text-xs text-slate-500 border-t border-slate-800/80">
-    Связь с администратором: <a href="https://t.me/MirsolieV" target="_blank" class="text-amber-400 font-medium hover:underline">@MirsolieV</a>
+  <!-- Sticky Bottom Checkout Bar -->
+  <footer class="fixed bottom-0 left-0 right-0 z-40 p-3 bg-[#080c14]/95 backdrop-blur-xl border-t border-amber-500/25 shadow-2xl">
+    <div class="max-w-lg mx-auto flex items-center justify-between gap-3">
+      <div class="pl-1">
+        <span id="bar-calc-breakdown" class="text-[10px] text-slate-400 block font-medium tracking-tight">Товар: 187 000 сум</span>
+        <div id="bar-total-price" class="text-base sm:text-xl font-black gold-gradient-text font-mono-num tracking-tight">187 000 сум</div>
+      </div>
+
+      <button id="btn-submit-order" class="flex-1 py-3 px-5 rounded-2xl gold-btn text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition font-heading font-black">
+        <span id="btn-submit-text">Оформить заказ</span>
+        <span>→</span>
+      </button>
+    </div>
   </footer>
 
-  <!-- Модальное окно оформления заказа -->
-  <div id="checkout-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-amber-500/30 rounded-2xl p-5 w-full max-w-sm text-white shadow-2xl space-y-3">
-      <div class="flex justify-between items-center pb-2 border-b border-slate-800">
-        <h4 class="font-bold text-sm text-amber-400">Подтверждение заказа</h4>
-        <button onclick="closeCheckout()" class="text-slate-400 text-lg">✕</button>
+  <!-- MODAL: Checkout Confirmation -->
+  <div id="modal-payment" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 hidden transition-opacity">
+    <div class="w-full max-w-md bg-[#0c121e] border border-amber-500/30 rounded-t-3xl sm:rounded-3xl p-5 space-y-4 max-h-[90vh] overflow-y-auto no-scrollbar shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <span id="modal-header-icon">💳</span> <span id="modal-header-title">Подтверждение заказа</span>
+        </h3>
+        <button id="btn-close-modal" class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-sm">
+          ✕
+        </button>
       </div>
-      <div class="space-y-1">
-        <div class="text-xs text-slate-400">Услуга / Товар:</div>
-        <div id="modal-service-name" class="font-bold text-sm text-white"></div>
-        <div id="modal-service-price" class="text-xs text-amber-400 font-semibold"></div>
+
+      <div class="p-4 rounded-2xl bg-[#070a10] border border-slate-800 text-xs space-y-2">
+        <div class="flex justify-between"><span id="m-label-service" class="text-slate-400">Услуга:</span> <strong id="modal-item-name" class="text-white">...</strong></div>
+        <div id="modal-qty-row" class="flex justify-between"><span id="m-label-qty" class="text-slate-400">Количество:</span> <strong id="modal-qty-val" class="text-white font-mono-num">1 шт</strong></div>
+        <div id="modal-discount-row" class="hidden flex justify-between text-emerald-400 font-bold"><span id="m-label-discount">Оптовая скидка:</span> <span id="modal-discount-val" class="font-mono-num">-5%</span></div>
+        <div class="flex justify-between"><span id="m-label-rec" class="text-slate-400">Получатель / контакт:</span> <span id="modal-recipient" class="text-amber-400 font-mono">@...</span></div>
+        <div id="modal-visit-info-row" class="hidden p-2.5 rounded-xl bg-amber-950/30 border border-amber-500/30 text-amber-200 text-[11px] space-y-1">
+          <div id="m-visit-title" class="font-bold flex items-center gap-1.5 text-xs text-amber-300"><span>🚗</span> Заказ с выездом мастера:</div>
+          <div>• <span id="m-phone">Телефон</span>: <strong id="modal-phone-val" class="text-white font-mono">-</strong></div>
+          <div>• <span id="m-tg">Telegram</span>: <strong id="modal-tg-val" class="text-amber-300 font-mono">-</strong></div>
+          <div>• <span id="m-loc">Локация</span>: <span id="modal-loc-val" class="text-slate-300">-</span></div>
+          <div id="m-sched-note" class="text-[10px] text-amber-300/80 pt-0.5">• Выезд: Пн–Пт после 18:00 / Сб–Вс по согласованию</div>
+        </div>
+        <div class="flex justify-between pt-1.5 border-t border-slate-800 font-bold"><span id="m-label-cost" class="text-slate-300">Стоимость услуги:</span> <strong id="modal-total" class="text-emerald-400 text-sm font-mono-num">...</strong></div>
+        <div id="modal-road-fee-note" class="hidden text-[10px] text-amber-400 text-right">+ стоимость дороги согласовывается в переписке</div>
       </div>
-      <div class="space-y-1 pt-1">
-        <label class="text-[11px] text-slate-400">Ваш телефон или детали (необязательно):</label>
-        <input type="text" id="order-comment" placeholder="+998 90 ... или комментарий" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-500">
+
+      <div id="requisites-box" class="p-3.5 rounded-2xl bg-[#090d16] border border-amber-500/25 space-y-2">
+        <span id="m-req-title" class="text-xs font-bold text-slate-300 block">Оплата на карту Uzcard / Humo:</span>
+        <div class="flex items-center justify-between bg-black/50 p-2.5 rounded-xl border border-slate-800">
+          <code id="req-number" class="text-sm font-mono text-amber-300 font-bold">9860 1234 5678 9000</code>
+          <button id="btn-copy-req" class="px-2.5 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-[11px] text-amber-300 font-bold rounded-lg border border-amber-500/30 transition flex items-center gap-1">
+            <span>📋</span> <span id="m-copy-text">Копировать</span>
+          </button>
+        </div>
+        <p class="text-[11px] text-slate-400">Получатель: M.M.M Store</p>
       </div>
-      <div class="pt-2 flex gap-2">
-        <button onclick="closeCheckout()" class="w-1/2 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">Отмена</button>
-        <button id="submit-order-btn" onclick="confirmAndSendOrder()" class="w-1/2 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-950 text-xs font-bold">Оформить</button>
+
+      <div id="cash-notice-box" class="hidden p-3.5 rounded-2xl bg-emerald-950/30 border border-emerald-500/30 text-xs text-emerald-200 space-y-1">
+        <div id="m-cash-title" class="font-bold text-white flex items-center gap-1.5">
+          <span>💵</span> Оплата лично специалисту
+        </div>
+        <p id="m-cash-desc" class="text-[11px] text-emerald-300/90">
+          Вы сможете оплатить заказ и дорогу наличными или переводом на месте после проверки и подключения на вашем телефоне.
+        </p>
       </div>
+
+      <div id="receipt-upload-box" class="space-y-2">
+        <label id="m-label-receipt" class="text-xs font-bold text-slate-300 block">
+          📎 Прикрепите скриншот чека перевода:
+        </label>
+        <div id="receipt-dropzone" class="border-2 border-dashed border-slate-700 hover:border-amber-500 rounded-2xl p-4 text-center cursor-pointer transition bg-black/40">
+          <div class="text-2xl mb-1">📸</div>
+          <p id="receipt-status-text" class="text-xs text-slate-300 font-medium">Нажмите, чтобы загрузить чек</p>
+          <p class="text-[10px] text-slate-500 mt-0.5">PNG, JPG, PDF или скриншот из банка</p>
+        </div>
+      </div>
+
+      <button id="btn-confirm-payment" class="w-full py-3.5 rounded-2xl gold-btn text-sm transition flex items-center justify-center gap-2">
+        <span id="btn-confirm-text">✅ Отправить заказ</span>
+      </button>
     </div>
   </div>
 
-  <!-- Модальное окно скрытой Админ-панели -->
+  <!-- MODAL: Orders History (Клиентская) -->
+  <div id="modal-history" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+    <div class="w-full max-w-md bg-[#0c121e] border border-amber-500/30 rounded-t-3xl sm:rounded-3xl p-5 space-y-4 max-h-[85vh] flex flex-col shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 id="modal-hist-title" class="text-base font-bold text-white flex items-center gap-2">
+          <span>📦</span> Мои заказы
+        </h3>
+        <button id="btn-close-history" class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-sm">
+          ✕
+        </button>
+      </div>
+      <div id="history-list" class="flex-1 overflow-y-auto space-y-2.5 pr-1 no-scrollbar"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: FAQ -->
+  <div id="modal-faq" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+    <div class="w-full max-w-md bg-[#0c121e] border border-amber-500/30 rounded-t-3xl sm:rounded-3xl p-5 space-y-4 max-h-[85vh] overflow-y-auto no-scrollbar shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 id="modal-faq-title" class="text-base font-bold text-white flex items-center gap-2">
+          <span>💬</span> Помощь & FAQ
+        </h3>
+        <button id="btn-close-faq" class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-sm">
+          ✕
+        </button>
+      </div>
+      <div id="faq-content-box" class="space-y-3 text-xs text-slate-300"></div>
+      <a href="https://t.me/MirsolieV" target="_blank" class="block w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-center font-bold text-xs text-white rounded-xl shadow-lg transition">
+        <span id="btn-contact-support">Написать в поддержку Telegram (@MirsolieV)</span> ↗
+      </a>
+    </div>
+  </div>
+
+  <!-- MODAL: Скрытая Админ-Панель M.M.M -->
   <div id="admin-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-amber-500/40 rounded-2xl p-5 w-full max-w-sm text-white shadow-2xl relative max-h-[85vh] flex flex-col">
       <div class="flex justify-between items-center pb-3 border-b border-white/10 mb-3">
-        <h3 class="text-sm font-bold text-amber-400">Панель заказов M.M.M Store</h3>
+        <h3 class="text-sm font-bold text-amber-400">Панель управления M.M.M</h3>
         <button onclick="closeAdminModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
       </div>
       
@@ -200,18 +773,27 @@
         <p id="admin-pin-error" class="text-rose-400 text-xs text-center hidden">Неверный PIN-код!</p>
       </div>
 
-      <!-- Список заказов с сервера -->
+      <!-- Список заказов с бэкенда -->
       <div id="admin-dashboard" class="hidden flex-1 overflow-y-auto space-y-2 pr-1">
         <div class="flex justify-between items-center mb-2">
           <span class="text-[11px] text-slate-400">Заказы на сервере Render:</span>
-          <button onclick="loadServerOrders()" class="text-[11px] text-amber-400 hover:underline">🔄 Обновить</button>
+          <button onclick="renderAdminOrders()" class="text-[11px] text-amber-400 hover:underline">🔄 Обновить</button>
         </div>
-        <div id="admin-orders-list" class="space-y-2 text-xs"></div>
+        <div id="admin-orders-list" class="space-y-2 text-xs">
+          <!-- Сюда подгружаются заказы с бэкенда -->
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- Toast -->
+  <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs shadow-2xl flex items-center gap-2 opacity-0 pointer-events-none transition-all duration-300 border border-amber-300">
+    <span id="toast-icon">✅</span>
+    <span id="toast-text">Действие выполнено</span>
+  </div>
+
   <script>
+    // Бэкенд Render и пин-код
     const BACKEND_URL = "https://mmm-store-app.onrender.com";
     const ADMIN_SECRET_PIN = "7777";
 
@@ -219,77 +801,1688 @@
     if (tg) {
       tg.ready();
       tg.expand();
-    }
-
-    let currentOrder = { service: '', price: '' };
-
-    function openCheckout(service, price) {
-      currentOrder = { service, price };
-      document.getElementById('modal-service-name').innerText = service;
-      document.getElementById('modal-service-price').innerText = price;
-      document.getElementById('order-comment').value = '';
-      document.getElementById('checkout-modal').classList.remove('hidden');
-    }
-
-    function closeCheckout() {
-      document.getElementById('checkout-modal').classList.add('hidden');
-    }
-
-    async function confirmAndSendOrder() {
-      const btn = document.getElementById('submit-order-btn');
-      btn.innerText = "Отправка...";
-      btn.disabled = true;
-
-      const comment = document.getElementById('order-comment').value.trim();
-      let detailsText = currentOrder.price;
-      if (comment) detailsText += ` (Инфо: ${comment})`;
-
-      let client = "Клиент Telegram";
-      if (tg?.initDataUnsafe?.user) {
-        const u = tg.initDataUnsafe.user;
-        client = u.username ? '@' + u.username : `${u.first_name} (ID: ${u.id})`;
-      }
-
       try {
-        const res = await fetch(`${BACKEND_URL}/api/order`, {
+        if (tg.setHeaderColor) tg.setHeaderColor('#07090e');
+        if (tg.setBackgroundColor) tg.setBackgroundColor('#07090e');
+      } catch (e) {}
+    }
+
+    // Функция гарантированной отправки на сервер Render
+    async function sendOrderToServer(serviceName, details, contact) {
+      try {
+        await fetch(`${BACKEND_URL}/api/order`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            service: currentOrder.service,
-            details: detailsText,
-            contact: client
+            service: serviceName,
+            details: details,
+            contact: contact
           })
         });
-
-        closeCheckout();
-        if (res.ok) {
-          alert(`✅ Заявка принята!\n\nТовар: ${currentOrder.service}\nСумма: ${currentOrder.price}\n\nАдминистратор свяжется с вами.`);
-        } else {
-          alert(`✅ Заказ принят: ${currentOrder.service}`);
-        }
-      } catch (e) {
-        closeCheckout();
-        console.error("Сетевая ошибка:", e);
-        alert(`✅ Заявка отправлена: ${currentOrder.service}`);
-      } finally {
-        btn.innerText = "Оформить";
-        btn.disabled = false;
+      } catch (err) {
+        console.error("Ошибка отправки заказа на Render:", err);
       }
     }
 
-    // Тройной клик по шапке для открытия админки
-    let headerClicks = 0;
-    let headerTimer = null;
-    document.getElementById('header-logo').addEventListener('click', () => {
-      headerClicks++;
-      clearTimeout(headerTimer);
-      headerTimer = setTimeout(() => { headerClicks = 0; }, 900);
-      if (headerClicks >= 3) {
-        headerClicks = 0;
-        openAdminModal();
+    const I18N = {
+      ru: {
+        bannerTag: "ПРЕМИАЛЬНЫЙ СЕРВИС",
+        bannerDesc: "Подписки, Stars, Трезвый водитель и Мастер на дом",
+        tabPrem: "Premium",
+        tabStars: "Stars",
+        subNoLogin: "Без входа в аккаунт",
+        subWithLogin: "С входом (дешевле)",
+        noLoginTitle: "Безопасный подарок по @username",
+        noLoginBody: "Пароли не требуются! Подписка отправляется официальным подарком на ваш аккаунт или другу.",
+        withLoginTitle: "Максимальная выгода",
+        withLoginBody: "Активация по коду входа через оператора. Можно оформить онлайн или заказать мастера к себе.",
+        starsTitle: "Официальные звёзды Telegram",
+        starsBody: "Для платных постов, подарков, реакций и ботов. Мгновенное начисление по вашему нику.",
+        visitTitle: "Личный выезд мастера",
+        visitSub: "Настроим прямо на вашем телефоне рядом с вами",
+        schedHeader: "🕒 График работы для выездов:",
+        schedWd: "Пн — Пт:",
+        schedWdVal: "После 18:00",
+        schedWe: "Сб — Вс:",
+        schedWeVal: "По договоренности",
+        schedNote: "💬 Стоимость дороги (в зависимости от расстояния) и точное время согласовываются в личных сообщениях или по звонку.",
+        phoneLabel: "📞 Ваш номер телефона:",
+        tgLabel: "💬 Ваш Telegram ник для связи:",
+        locLabel: "📍 Район или ориентир (место встречи):",
+        locPlaceholder: "Например: Чиланзар 9 / ориентир метро / БЦ",
+        recHeader: "🎯 Аккаунт для зачисления подарка:",
+        recHelper: "Укажите @username человека, которому отправится подарок.",
+        buySelf: "Купить себе",
+        payHeader: "💳 Способ оплаты:",
+        payCardTitle: "Карта (перевод)",
+        payCashTitle: "При встрече",
+        payCashSub: "С выездом",
+        totalLabel: "Товар:",
+        visitInPms: "выезд: согласуется в ЛС",
+        btnSubmit: "Оформить заказ",
+        btnSubmitVisit: "Заказать с выездом",
+        modalTitle: "Подтверждение заказа",
+        mService: "Услуга:",
+        mRec: "Получатель / контакт:",
+        mVisitHead: "🚗 Заказ с выездом мастера:",
+        mPhone: "Телефон",
+        mTg: "Telegram",
+        mLoc: "Локация",
+        mSchedNote: "• Выезд: Пн–Пт после 18:00 / Сб–Вс по согласованию",
+        mCost: "Стоимость услуги:",
+        mRoadNote: "+ стоимость дороги согласовывается в переписке",
+        mReqTitle: "Оплата на карту Uzcard / Humo:",
+        mCopy: "Копировать",
+        mCashHead: "💵 Оплата лично специалисту",
+        mCashDesc: "Вы сможете оплатить заказ и дорогу наличными или переводом на месте после проверки и подключения на вашем телефоне.",
+        mReceiptLabel: "📎 Прикрепите скриншот чека перевода:",
+        mReceiptStatus: "Нажмите, чтобы загрузить чек",
+        mReceiptStatusDone: "✓ Чек прикреплен (receipt_bank.png)",
+        btnSendOrder: "✅ Отправить заказ",
+        btnSendVisit: "🚀 Заказать выезд (оплата на месте)",
+        btnSendVisitReceipt: "✅ Отправить заявку с чеком",
+        histTitle: "📦 Мои заказы",
+        histEmpty: "У вас пока нет заказов.<br>Выберите услугу на главной странице!",
+        faqTitle: "💬 Помощь & FAQ",
+        btnSupport: "Написать в поддержку Telegram (@MirsolieV)",
+        toastRecipientReq: "Введите получателя!",
+        toastContactReq: "Укажите телефон или Telegram ник для связи!",
+        toastReceiptReq: "Пожалуйста, прикрепите чек перевода!",
+        toastOrderSuccess: "Заказ оформлен!",
+        toastVisitSuccess: "Заявка принята! Мы скоро свяжемся.",
+        toastCopied: "Номер карты скопирован!",
+        toastSelfSet: "Подставлен ваш аккаунт",
+        tabAuto: "Авто",
+        autoSubSober: "Трезвый водитель",
+        autoSubService: "Прикурить авто",
+        autoBadgeTag: "ТОЛЬКО В ПРИСУТСТВИИ ВЛАДЕЛЬЦА",
+        autoBadgeJumpTag: "СРОЧНЫЙ ВЫЕЗД С БУСТЕРОМ 12V",
+        autoSoberTitle: "Услуга «Трезвый водитель»",
+        autoSoberDesc: "Безопасно довезем вас на вашем автомобиле. Вождение выполняется строго в присутствии владельца авто. Управляем любыми авто (АКПП, МКПП, электро).",
+        autoServiceTitle: "Услуга «Прикурить авто» (Запуск 12V)",
+        autoServiceDesc: "Разрядился аккумулятор? Приедем со специальным пусковым бустером и профессиональными проводами. Быстрый запуск двигателя на месте.",
+        autoFormTitle: "Детали заявки:",
+        autoFromLabel: "📍 Где находится авто (Точка А):",
+        autoFromPlaceholder: "Точный адрес, ресторан, парковка или ориентир",
+        autoToLabel: "🏁 Куда ехать (Точка Б):",
+        autoToPlaceholder: "Домашний адрес / парковка / ориентир",
+        autoCarLabel: "🚘 Марка и модель авто:",
+        autoGearLabel: "🕹 Коробка передач:",
+        autoTimeLabel: "🕒 Время подачи специалиста:",
+        autoTimeNowText: "⚡️ Срочно (15-25 мин)",
+        autoTimeCustomText: "🕒 Ко времени",
+        autoPriceNoteText: "<strong>Согласование цены:</strong> стоимость согласовывается индивидуально в диалоге или по звонку перед выездом мастера (от расстояния и локации).",
+        btnAutoSubmitText: "Вызвать водителя",
+        btnJumpSubmitText: "Вызвать мастера (Прикурить)",
+        autoPriceAgreed: "По договоренности",
+        toastAutoReqPoints: "Укажите местонахождение авто!",
+        toastAutoReqPointsFull: "Укажите адреса откуда и куда!",
+        toastAutoReqContact: "Укажите номер телефона для связи с мастером!",
+        toastAutoSuccess: "Заявка на водителя принята! Мы скоро свяжемся.",
+        toastJumpSuccess: "Заявка на прикуривание принята! Мастер выезжает.",
+        qtyTitle: "🎁 Количество тарифов:",
+        discountTierText: "Скидка 5% от 2 шт, 7% от 3 шт, 10% от 5 шт",
+        discountBadge: "Оптовая скидка",
+        qtyWord: "шт",
+        savedWord: "Экономия",
+        mQtyLabel: "Количество:",
+        mDiscountLabel: "Оптовая скидка:",
+        tabHandyman: "Мастер",
+        hmBadgeTag: "ПРОВЕРЕННЫЙ И ОПРЯТНЫЙ СПЕЦИАЛИСТ",
+        hmTitle: "Экспресс-мастер на дом («Муж на час»)",
+        hmDesc: "Быстрая и аккуратная помощь в квартире: повесить карниз или зеркало, собрать мебель, починить розетку, заменить смеситель или устранить засор. Со своим набором инструментов.",
+        hmCatTitle: "Что требуется сделать:",
+        hmMountTitle: "Монтаж & Карнизы",
+        hmMountSub: "Полки, люстры, зеркала, ТВ",
+        hmSanTitle: "Сантехника",
+        hmSanSub: "Смеситель, засор, сифон",
+        hmElecTitle: "Электрика",
+        hmElecSub: "Розетки, выключатели, свет",
+        hmFurnTitle: "Сборка мебели",
+        hmFurnSub: "Тумбы, столы, стулья, петли",
+        hmFormTitle: "Детали вызова мастера:",
+        hmAddrLabel: "📍 Ваш адрес / ориентир в Ташкенте:",
+        hmAddrPlaceholder: "Район, улица, дом, этаж, домофон",
+        hmDescLabel: "📝 Кратко опишите задачу (что починить):",
+        hmDescPlaceholder: "Например: повесить 2 полки на стену и заменить 1 розетку",
+        hmTimeLabel: "🕒 Желаемое время визита:",
+        hmTimeNow: "⚡️ Срочно (30-50 мин)",
+        hmTimeCustom: "🕒 Ко времени",
+        hmPriceNote: "<strong>Оплата по результату:</strong> мастер оценивает объем работы до начала ремонта. Оплата производится после того, как вы проверите результат лично.",
+        btnHmSubmitText: "Вызвать мастера на дом",
+        toastHmReqAddress: "Укажите адрес вызова мастера!",
+        toastHmReqDesc: "Опишите, что требуется сделать!",
+        toastHmReqContact: "Укажите номер телефона для связи!",
+        toastHmSuccess: "Заявка на мастера принята! Мы скоро свяжемся."
+      },
+      uz: {
+        bannerTag: "PREMIAL XIZMAT",
+        bannerDesc: "Obunalar, Stars, Hushyor haydovchi va Uyga usta",
+        tabPrem: "Premium",
+        tabStars: "Stars",
+        subNoLogin: "Kirishsiz (Sovg'a)",
+        subWithLogin: "Kirish bilan (Arzonroq)",
+        noLoginTitle: "@username orqali xavfsiz sovg'a",
+        noLoginBody: "Parol kerak emas! Obuna rasmiy sovg'a sifatida sizning yoki do'stingizning profiliga yuboriladi.",
+        withLoginTitle: "Maksimal tejash",
+        withLoginBody: "Operator orqali kod bilan faollashtirish. Onlayn yoki mutaxassis tashrifi bilan buyurtma qiling.",
+        starsTitle: "Rasmiy Telegram Yulduzlari",
+        starsBody: "Pullik postlar, sovg'alar, reaksiyalar va botlar uchun. profilingizga bir zumda yuklanadi.",
+        visitTitle: "Mutaxassis shaxsiy tashrifi",
+        visitSub: "To'g'ridan-to'g'ri telefoningizda yonma-yon ulab beramiz",
+        schedHeader: "🕒 Tashriflar uchun ish vaqti:",
+        schedWd: "Dush — Juma:",
+        schedWdVal: "18:00 dan keyin",
+        schedWe: "Shanba — Yak:",
+        schedWeVal: "Kelishuv asosida",
+        schedNote: "💬 Yo'l haqi (masofaga qarab) va aniq vaqt shaxsiy xabarlarda yoki qo'ng'iroqda kelishiladi.",
+        phoneLabel: "📞 Telefon raqamingiz:",
+        tgLabel: "💬 Bog'lanish uchun Telegram nik:",
+        locLabel: "📍 Tuman yoki mo'ljal (uchrashuv joyi):",
+        locPlaceholder: "Masalan: Chilonzor 9 / metro yaqinida / Orient BM",
+        recHeader: "🎯 Xizmat qabul qiluvchi hisob:",
+        recHelper: "Sovg'a yuboriladigan shaxsning @username manzilini kiriting.",
+        buySelf: "O'zimga olish",
+        payHeader: "💳 To'lov usuli:",
+        payCardTitle: "Karta orqali",
+        payCashTitle: "Uchrashuvda",
+        payCashSub: "Tashrif bilan",
+        totalLabel: "Xizmat:",
+        visitInPms: "tashrif: lichkada kelishiladi",
+        btnSubmit: "Buyurtma berish",
+        btnSubmitVisit: "Tashrif bilan buyurtma",
+        modalTitle: "Buyurtmani tasdiqlash",
+        mService: "Xizmat:",
+        mRec: "Qabul qiluvchi / aloqa:",
+        mVisitHead: "🚗 Mutaxassis tashrifi bilan buyurtma:",
+        mPhone: "Telefon",
+        mTg: "Telegram",
+        mLoc: "Manzil",
+        mSchedNote: "• Tashrif: Dush–Juma 18:00 dan keyin / Shanba–Yak kelishuv bo'yicha",
+        mCost: "Xizmat narxi:",
+        mRoadNote: "+ yo'l haqi xabarlashuvda kelishiladi",
+        mReqTitle: "Uzcard / Humo kartasiga to'lov:",
+        mCopy: "Nusxalash",
+        mCashHead: "💵 Mutaxassisga joyida to'lash",
+        mCashDesc: "Telefoningizda xizmat faollashtirilgach, naqd yoki karta orqali to'lov qilasiz.",
+        mReceiptLabel: "📎 To'lov chekining skrinshotini yuklang:",
+        mReceiptStatus: "Chekni yuklash uchun bosing",
+        mReceiptStatusDone: "✓ Chek biriktirildi (receipt_bank.png)",
+        btnSendOrder: "✅ Buyurtmani yuborish",
+        btnSendVisit: "🚀 Tashrifni buyurtma qilish (joyida to'lov)",
+        btnSendVisitReceipt: "✅ Chek bilan arizani yuborish",
+        histTitle: "📦 Mening buyurtmalarim",
+        histEmpty: "Sizda hali buyurtmalar yo'q.<br>Bosh sahifadan xizmat tanlang!",
+        faqTitle: "💬 Yordam & FAQ",
+        btnSupport: "Telegram qo'llab-quvvatlashga yozish",
+        toastRecipientReq: "Qabul qiluvchini kiriting!",
+        toastContactReq: "Aloqa uchun telefon yoki Telegram nik kiriting!",
+        toastReceiptReq: "Iltimos, to'lov chekini yuklang!",
+        tabAuto: "Avto",
+        autoSubSober: "Hushyor haydovchi",
+        autoSubService: "Akkumulyator (Zaryad)",
+        autoBadgeTag: "FAQAT EGANING ISHTIROKIDA",
+        autoBadgeJumpTag: "12V BUSTER BILAN TEZKOR CHIQISH",
+        autoSoberTitle: "«Hushyor haydovchi» xizmati",
+        autoSoberDesc: "Sizni shaxsiy avtomobilingizda xavfsiz yetkazib qo'yamiz. Haydash qat'iy ravishda avto egasining ishtirokida amalga oshiriladi (mexanika, avtomat, elektromobil).",
+        autoServiceTitle: "«Akkumulyatorni zaryadlash / o't oldirish» (12V)",
+        autoServiceDesc: "Akkumulyatoringiz o'tirib qoldimi? Maxsus starter buster va kuchli simlar bilan tez yetib borib, mashinangizni joyida yurgizib beramiz.",
+        autoFormTitle: "Ariza tafsilotlari:",
+        autoFromLabel: "📍 Mashina qayerda joylashgan (A nuqta):",
+        autoFromPlaceholder: "Aniq manzil, restoran, parkovka yoki mo'ljal",
+        autoToLabel: "🏁 Qayerga yetkazish kerak (B nuqta):",
+        autoToPlaceholder: "Uy manzili / avtoturargoh / mo'ljal",
+        autoCarLabel: "🚘 Avtomobil rusumi va modeli:",
+        autoGearLabel: "🕹 Uzatmalar qutisi:",
+        autoTimeLabel: "🕒 Mutaxassis yetib kelish vaqti:",
+        autoTimeNowText: "⚡️ Tezkor chaqirish (15-25 daqiqa)",
+        autoTimeCustomText: "🕒 Belgilangan vaqtga",
+        autoPriceNoteText: "<strong>Narx kelishuvi:</strong> xizmat narxi masofa va manzilga qarab haydovchi/usta chiqishidan oldin kelishiladi.",
+        btnAutoSubmitText: "Haydovchi chaqirish",
+        btnJumpSubmitText: "Ustani chaqirish (Zaryadlash)",
+        autoPriceAgreed: "Kelishuv asosida",
+        toastAutoReqPoints: "Mashina turgan joyni kiriting!",
+        toastAutoReqPointsFull: "Qayerdan va qayerga borishni kiriting!",
+        toastAutoReqContact: "Usta bog'lanishi uchun telefon raqam kiriting!",
+        toastAutoSuccess: "Haydovchiga ariza qabul qilindi! Tez orada bog'lanamiz.",
+        toastJumpSuccess: "Akkumulyatorni yurgizishga ariza qabul qilindi! Tez orada bog'lanamiz.",
+        qtyTitle: "🎁 Tariflar soni:",
+        discountTierText: "2 tadan 5%, 3 tadan 7%, 5 tadan 10% chegirma",
+        discountBadge: "Ulgurji chegirma",
+        qtyWord: "ta",
+        savedWord: "Tejaldi",
+        mQtyLabel: "Soni:",
+        mDiscountLabel: "Ulgurji chegirma:",
+        tabHandyman: "Usta",
+        hmBadgeTag: "TEKSHIRILGAN VA XUSHFE'L USTA",
+        hmTitle: "Tezkor uy ustasi («Erkak kishi xizmati»)",
+        hmDesc: "Xonadonda tezkor va tartibli yordam: korniz yoki ko'zgu ilish, mebel yig'ish, rozetkani tuzatish, kran almashtirish. O'zining professional asboblari bilan.",
+        hmCatTitle: "Nima ish bajarilishi kerak:",
+        hmMountTitle: "O'rnatish & Kornizlar",
+        hmMountSub: "Polka, lyustra, ko'zgu, TV",
+        hmSanTitle: "Santexnika",
+        hmSanSub: "Kran, tiqilish, sifatli tuzatish",
+        hmElecTitle: "Elektr ishlari",
+        hmElecSub: "Rozetka, yoqgich, chiroqlar",
+        hmFurnTitle: "Mebel yig'ish",
+        hmFurnSub: "Tumba, stol, stul, ilgaklar",
+        hmFormTitle: "Usta chaqirish tafsilotlari:",
+        hmAddrLabel: "📍 Toshkentdagi manzilingiz / mo'ljal:",
+        hmAddrPlaceholder: "Tuman, ko'cha, uy, qavat, domofon",
+        hmDescLabel: "📝 Vazifani qisqacha yozing:",
+        hmDescPlaceholder: "Masalan: 2 ta polka ilish va 1 ta rozetkani almashtirish",
+        hmTimeLabel: "🕒 Usta kelishining qulay vaqti:",
+        hmTimeNow: "⚡️ Tezkor (30-50 daqiqa)",
+        hmTimeCustom: "🕒 Belgilangan vaqtga",
+        hmPriceNote: "<strong>Natijaga qarab to'lov:</strong> ish boshlanishidan oldin narx kelishiladi. To'lov ishni shaxsan tekshirib qabul qilganingizdan so'ng amalga oshiriladi.",
+        btnHmSubmitText: "Uyga usta chaqirish",
+        toastHmReqAddress: "Iltimos, manzilni kiriting!",
+        toastHmReqDesc: "Iltimos, qanday ish kerakligini yozing!",
+        toastHmReqContact: "Aloqa uchun telefon raqam kiriting!",
+        toastHmSuccess: "Ustaga ariza qabul qilindi! Tez orada bog'lanamiz."
+      },
+      en: {
+        bannerTag: "VIP SERVICE",
+        bannerDesc: "Subscriptions, Stars, Sober Driver and Home Master",
+        tabPrem: "Premium",
+        tabStars: "Stars",
+        subNoLogin: "No Login Required (Gift)",
+        subWithLogin: "With Login (Discounted)",
+        noLoginTitle: "Safe Gift via @username",
+        noLoginBody: "No password needed! Subscription is sent directly as an official gift to your profile.",
+        withLoginTitle: "Maximum Savings",
+        withLoginBody: "Activation via SMS code with operator. Order online or request an on-site master visit.",
+        starsTitle: "Official Telegram Stars",
+        starsBody: "For paid posts, reactions, gifts and bots. Instant top-up to your @username.",
+        visitTitle: "Personal Master Visit",
+        visitSub: "We will configure it directly on your device by your side",
+        schedHeader: "🕒 Working hours for visits:",
+        schedWd: "Mon — Fri:",
+        schedWdVal: "After 18:00",
+        schedWe: "Sat — Sun:",
+        schedWeVal: "By agreement",
+        schedNote: "💬 Transport cost (depending on distance) and exact time are negotiated in PM or by phone.",
+        phoneLabel: "📞 Your contact phone number:",
+        tgLabel: "💬 Your Telegram username:",
+        locLabel: "📍 District or landmark (meeting point):",
+        locPlaceholder: "E.g., Chilanzar 9 / near metro / Business Center",
+        recHeader: "🎯 Recipient account:",
+        recHelper: "Enter @username of the person who will receive the gift.",
+        buySelf: "Buy for myself",
+        payHeader: "💳 Payment Method:",
+        payCardTitle: "Card transfer",
+        payCashTitle: "On-site",
+        payCashSub: "With visit",
+        totalLabel: "Item:",
+        visitInPms: "visit: agreed in PM",
+        btnSubmit: "Place Order",
+        btnSubmitVisit: "Order with Visit",
+        modalTitle: "Order Confirmation",
+        mService: "Service:",
+        mRec: "Recipient / Contact:",
+        mVisitHead: "🚗 Order with Specialist Visit:",
+        mPhone: "Phone",
+        mTg: "Telegram",
+        mLoc: "Location",
+        mSchedNote: "• Visit: Mon–Fri after 18:00 / Sat–Sun by agreement",
+        mCost: "Service price:",
+        mRoadNote: "+ transport cost is negotiated in PM",
+        mReqTitle: "Payment to Uzcard / Humo card:",
+        mCopy: "Copy",
+        mCashHead: "💵 Pay on-site to specialist",
+        mCashDesc: "Pay cash or card on-site directly to specialist after verifying service activation on your device.",
+        mReceiptLabel: "📎 Attach payment receipt screenshot:",
+        mReceiptStatus: "Click to upload receipt",
+        mReceiptStatusDone: "✓ Receipt attached (receipt_bank.png)",
+        btnSendOrder: "✅ Send Order",
+        btnSendVisit: "🚀 Request Visit (Pay On-Site)",
+        btnSendVisitReceipt: "✅ Send Request with Receipt",
+        histTitle: "📦 My Orders",
+        histEmpty: "No orders yet.<br>Choose a product on the main page!",
+        faqTitle: "💬 Help & FAQ",
+        btnSupport: "Contact Telegram Support",
+        toastRecipientReq: "Please enter recipient!",
+        toastContactReq: "Please enter phone or Telegram username!",
+        toastReceiptReq: "Please attach payment receipt!",
+        tabAuto: "Auto",
+        autoSubSober: "Sober Driver",
+        autoSubService: "Jump-Start 12V",
+        autoBadgeTag: "WITH OWNER PRESENT ONLY",
+        autoBadgeJumpTag: "URGENT 12V JUMP-STARTER VISIT",
+        autoSoberTitle: "Sober Driver Service",
+        autoSoberDesc: "Safe ride home in your own car. Driving is performed strictly with the vehicle owner present. Automatic, manual, and electric vehicles.",
+        autoServiceTitle: "Car Battery Jump-Start (12V)",
+        autoServiceDesc: "Dead battery? We arrive promptly with a professional high-power jump starter booster pack and cables to restart your engine on the spot.",
+        autoFormTitle: "Request Details:",
+        autoFromLabel: "📍 Car Location (Point A):",
+        autoFromPlaceholder: "Exact address, parking, restaurant, or landmark",
+        autoToLabel: "🏁 Destination (Point B):",
+        autoToPlaceholder: "Home address / parking / landmark",
+        autoCarLabel: "🚘 Vehicle make & model:",
+        autoGearLabel: "🕹 Transmission:",
+        autoTimeLabel: "🕒 Specialist arrival time:",
+        autoTimeNowText: "⚡️ ASAP (15-25 mins)",
+        autoTimeCustomText: "🕒 Scheduled time",
+        autoPriceNoteText: "<strong>Price agreement:</strong> service fee is agreed individually in chat or call before departure based on route & location.",
+        btnAutoSubmitText: "Request Driver",
+        btnJumpSubmitText: "Request Jump-Start",
+        autoPriceAgreed: "By agreement",
+        toastAutoReqPoints: "Please specify car location!",
+        toastAutoReqPointsFull: "Please specify pickup and destination addresses!",
+        toastAutoReqContact: "Please enter contact phone number!",
+        toastAutoSuccess: "Driver request received! We will contact you shortly.",
+        toastJumpSuccess: "Jump-start request received! Specialist is on the way.",
+        qtyTitle: "🎁 Quantity:",
+        discountTierText: "5% off for 2 pcs, 7% for 3 pcs, 10% for 5+ pcs",
+        discountBadge: "Bulk Discount",
+        qtyWord: "pcs",
+        savedWord: "Saved",
+        mQtyLabel: "Quantity:",
+        mDiscountLabel: "Volume discount:",
+        tabHandyman: "Handyman",
+        hmBadgeTag: "VERIFIED & TIDY TECHNICIAN",
+        hmTitle: "Express Home Master (Handyman)",
+        hmDesc: "Fast and tidy help at home: install curtains, mirrors, TV wall mounts, fix electrical outlets, plumbing leaks or furniture assembly. Full tool set provided.",
+        hmCatTitle: "Select task type:",
+        hmMountTitle: "Mounting & Curtains",
+        hmMountSub: "Shelves, chandeliers, mirrors, TV",
+        hmSanTitle: "Plumbing",
+        hmSanSub: "Faucets, siphon, unclogging",
+        hmElecTitle: "Electrical",
+        hmElecSub: "Sockets, switches, lighting",
+        hmFurnTitle: "Furniture Assembly",
+        hmFurnSub: "Stands, chairs, tables, hinges",
+        hmFormTitle: "Service Details:",
+        hmAddrLabel: "📍 Your address / landmark in Tashkent:",
+        hmAddrPlaceholder: "District, street, house, apt, intercom",
+        hmDescLabel: "📝 Describe your task briefly:",
+        hmDescPlaceholder: "E.g., hang 2 shelves and replace 1 outlet in the kitchen",
+        hmTimeLabel: "🕒 Preferred arrival time:",
+        hmTimeNow: "⚡️ ASAP (30-50 mins)",
+        hmTimeCustom: "🕒 Scheduled time",
+        hmPriceNote: "<strong>Pay after completion:</strong> price is confirmed with technician before work begins. Payment strictly upon your personal satisfaction.",
+        btnHmSubmitText: "Call Home Master",
+        toastHmReqAddress: "Please enter your address!",
+        toastHmReqDesc: "Please describe what needs to be done!",
+        toastHmReqContact: "Please enter contact phone number!",
+        toastHmSuccess: "Master request received! We will call you shortly."
       }
+    };
+
+    let currentLang = 'ru';
+    let currentQuantity = 1;
+
+    const PRICING = {
+      premium_no_login: [
+        { id: 'p_nl_3', months: 3, price: 187000, badge: { ru: '🔥 ХИТ ПРОДАЖ', uz: '🔥 TOP SOTUV', en: '🔥 BESTSELLER' }, descKey: 'gift' },
+        { id: 'p_nl_6', months: 6, price: 252000, badge: { ru: '⚡️ ТОП ВЫБОР', uz: '⚡️ TOP TANLOV', en: '⚡️ TOP CHOICE' }, descKey: 'gift' },
+        { id: 'p_nl_12', months: 12, price: 456000, badge: { ru: '💎 МАКСИМАЛЬНАЯ ВЫГОДА', uz: '💎 ENG FOYDALI', en: '💎 BEST VALUE' }, descKey: 'gift' },
+      ],
+      premium_with_login: [
+        { id: 'p_wl_1', months: 1, price: 43000, badge: { ru: '⚡️ БЫСТРЫЙ СТАРТ', uz: '⚡️ TEZKOR', en: '⚡️ QUICK START' }, descKey: 'login' },
+        { id: 'p_wl_12', months: 12, price: 324000, badge: { ru: '💰 ЭКОНОМИЯ 132 000 СУМ', uz: '💰 132 000 TEJASH', en: '💰 SAVE 132K UZS' }, descKey: 'login' },
+      ],
+      stars: [
+        { id: 's_100', count: 100, price: 30500, badge: { ru: '👍 ЛЕГКИЙ ПАКЕТ', uz: '👍 QULAY', en: '👍 POPULAR' } },
+        { id: 's_150', count: 150, price: 44500, badge: null },
+        { id: 's_250', count: 250, price: 72000, badge: null },
+        { id: 's_350', count: 350, price: 101000, badge: null },
+        { id: 's_500', count: 500, price: 142000, badge: { ru: '🔥 ВЫГОДНО', uz: '🔥 FOYDALI', en: '🔥 POPULAR' } },
+        { id: 's_750', count: 750, price: 211000, badge: null },
+        { id: 's_1000', count: 1000, price: 281000, badge: { ru: '💎 VIP ПАКЕТ', uz: '💎 VIP PAKET', en: '💎 VIP PACK' } },
+      ]
+    };
+
+    let currentMainTab = 'premium';
+    let currentPremSubTab = 'no_login';
+    let selectedItem = PRICING.premium_no_login[0];
+    let selectedPayment = 'card';
+    let isVisitEnabled = false;
+    let receiptAttached = false;
+    let ordersHistory = [];
+
+    let currentAutoSubService = 'sober';
+    let selectedGearbox = 'auto';
+    let selectedDepartureTime = 'now';
+
+    let selectedHandymanCategory = 'mount';
+    let selectedHandymanTime = 'now';
+
+    const telegramUser = tg?.initDataUnsafe?.user;
+    const defaultUsername = telegramUser?.username ? `@${telegramUser.username}` : '@username_client';
+
+    const inputRecipient = document.getElementById('input-recipient');
+    if (inputRecipient) inputRecipient.value = defaultUsername;
+
+    const inputVisitTg = document.getElementById('input-visit-tg');
+    if (inputVisitTg) inputVisitTg.value = defaultUsername;
+
+    const inputAutoTg = document.getElementById('input-auto-tg');
+    if (inputAutoTg) inputAutoTg.value = defaultUsername;
+
+    const inputHmTg = document.getElementById('input-hm-tg');
+    if (inputHmTg) inputHmTg.value = defaultUsername;
+
+    document.getElementById('user-greeting').innerText = telegramUser 
+      ? `${telegramUser.first_name || defaultUsername} • VIP Client` 
+      : 'Ташкент • VIP Lounge';
+
+    function formatPrice(p) {
+      const curr = currentLang === 'en' ? ' UZS' : ' сум';
+      return Math.round(p).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + curr;
+    }
+
+    function showToast(text, icon = '✅') {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-icon').innerText = icon;
+      document.getElementById('toast-text').innerText = text;
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none');
+      }, 2500);
+    }
+
+    function applyLanguage(lang) {
+      currentLang = lang;
+      const t = I18N[lang];
+
+      document.getElementById('banner-tag').innerText = t.bannerTag;
+      document.getElementById('banner-desc').innerText = t.bannerDesc;
+
+      document.getElementById('label-tab-premium').innerText = t.tabPrem;
+      document.getElementById('label-tab-stars').innerText = t.tabStars;
+      document.getElementById('label-tab-auto').innerText = t.tabAuto || 'Авто';
+      document.getElementById('label-no-login-tab').innerText = t.subNoLogin;
+      document.getElementById('label-with-login-tab').innerText = t.subWithLogin;
+
+      document.getElementById('desc-no-login-title').innerText = t.noLoginTitle;
+      document.getElementById('desc-no-login-body').innerText = t.noLoginBody;
+      document.getElementById('desc-with-login-title').innerText = t.withLoginTitle;
+      document.getElementById('desc-with-login-body').innerText = t.withLoginBody;
+      document.getElementById('desc-stars-title').innerText = t.starsTitle;
+      document.getElementById('desc-stars-body').innerText = t.starsBody;
+
+      document.getElementById('label-visit-title').innerHTML = `${t.visitTitle} <span class="text-[9px] bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black px-1.5 py-0.2 rounded uppercase">VIP</span>`;
+      document.getElementById('label-visit-subtitle').innerText = t.visitSub;
+      document.getElementById('label-schedule-header').innerHTML = t.schedHeader;
+      document.getElementById('label-sched-weekdays').innerText = t.schedWd;
+      document.getElementById('label-sched-weekdays-val').innerText = t.schedWdVal;
+      document.getElementById('label-sched-weekends').innerText = t.schedWe;
+      document.getElementById('label-sched-weekends-val').innerText = t.schedWeVal;
+      document.getElementById('label-sched-note').innerText = t.schedNote;
+
+      document.getElementById('label-phone').innerText = t.phoneLabel;
+      document.getElementById('label-tg-nick').innerText = t.tgLabel;
+      document.getElementById('label-location').innerText = t.locLabel;
+      document.getElementById('input-visit-location').placeholder = t.locPlaceholder;
+
+      document.getElementById('label-recipient-header').innerHTML = `<span>🎯</span> ${t.recHeader}`;
+      document.getElementById('recipient-helper').innerText = t.recHelper;
+      document.getElementById('btn-self-recipient').innerText = t.buySelf;
+
+      document.getElementById('label-pay-method-header').innerText = t.payHeader;
+      document.getElementById('pay-card-title').innerText = t.payCardTitle;
+      document.getElementById('pay-cash-title').innerText = t.payCashTitle;
+      document.getElementById('cash-desc-text').innerText = t.payCashSub;
+
+      document.getElementById('modal-header-title').innerText = t.modalTitle;
+      document.getElementById('m-label-service').innerText = t.mService;
+      document.getElementById('m-label-rec').innerText = t.mRec;
+      document.getElementById('m-visit-title').innerHTML = t.mVisitHead;
+      document.getElementById('m-phone').innerText = t.mPhone;
+      document.getElementById('m-tg').innerText = t.mTg;
+      document.getElementById('m-loc').innerText = t.mLoc;
+      document.getElementById('m-sched-note').innerText = t.mSchedNote;
+      document.getElementById('m-label-cost').innerText = t.mCost;
+      document.getElementById('modal-road-fee-note').innerText = t.mRoadNote;
+      document.getElementById('m-req-title').innerText = t.mReqTitle;
+      document.getElementById('m-copy-text').innerText = t.mCopy;
+      document.getElementById('m-cash-title').innerHTML = t.mCashHead;
+      document.getElementById('m-cash-desc').innerText = t.mCashDesc;
+      document.getElementById('m-label-receipt').innerText = t.mReceiptLabel;
+      document.getElementById('receipt-status-text').innerText = receiptAttached ? t.mReceiptStatusDone : t.mReceiptStatus;
+
+      document.getElementById('modal-hist-title').innerHTML = t.histTitle;
+      document.getElementById('modal-faq-title').innerHTML = t.faqTitle;
+      document.getElementById('btn-contact-support').innerText = t.btnSupport;
+
+      const elTabAuto = document.getElementById('label-tab-auto');
+      if (elTabAuto) elTabAuto.innerText = t.tabAuto || 'Авто';
+      const elSoberTab = document.getElementById('label-sober-tab');
+      if (elSoberTab) elSoberTab.innerText = t.autoSubSober || 'Трезвый водитель';
+      const elServiceTab = document.getElementById('label-service-tab');
+      if (elServiceTab) elServiceTab.innerText = t.autoSubService || 'Прикурить авто';
+      const elAutoBadge = document.getElementById('auto-badge-tag');
+      if (elAutoBadge) elAutoBadge.innerText = currentAutoSubService === 'sober' ? t.autoBadgeTag : t.autoBadgeJumpTag;
+      const elAutoTitle = document.getElementById('auto-service-title');
+      if (elAutoTitle) elAutoTitle.innerText = currentAutoSubService === 'sober' ? t.autoSoberTitle : t.autoServiceTitle;
+      const elAutoDesc = document.getElementById('auto-service-desc');
+      if (elAutoDesc) elAutoDesc.innerText = currentAutoSubService === 'sober' ? t.autoSoberDesc : t.autoServiceDesc;
+      const elAutoFormTitle = document.getElementById('label-auto-form-title');
+      if (elAutoFormTitle) elAutoFormTitle.innerText = t.autoFormTitle || 'Детали заявки:';
+      const elAutoFrom = document.getElementById('label-auto-from');
+      if (elAutoFrom) elAutoFrom.innerText = t.autoFromLabel || '📍 Где находится авто:';
+      const inputAutoFrom = document.getElementById('input-auto-from');
+      if (inputAutoFrom) inputAutoFrom.placeholder = t.autoFromPlaceholder || 'Точный адрес или ориентир';
+      const elAutoTo = document.getElementById('label-auto-to');
+      if (elAutoTo) elAutoTo.innerText = t.autoToLabel || '🏁 Куда ехать (Точка Б):';
+      const inputAutoTo = document.getElementById('input-auto-to');
+      if (inputAutoTo) inputAutoTo.placeholder = t.autoToPlaceholder || 'Адрес назначения';
+      const elAutoCar = document.getElementById('label-auto-car');
+      if (elAutoCar) elAutoCar.innerText = t.autoCarLabel || '🚘 Марка и модель:';
+      const elAutoGear = document.getElementById('label-auto-gearbox');
+      if (elAutoGear) elAutoGear.innerText = t.autoGearLabel || '🕹 Коробка передач:';
+      const elAutoTime = document.getElementById('label-auto-time');
+      if (elAutoTime) elAutoTime.innerText = t.autoTimeLabel || '🕒 Время подачи:';
+      const btnTimeNowEl = document.getElementById('btn-time-now');
+      if (btnTimeNowEl) btnTimeNowEl.innerText = t.autoTimeNowText || '⚡️ Срочно';
+      const btnTimeCustomEl = document.getElementById('btn-time-custom');
+      if (btnTimeCustomEl) btnTimeCustomEl.innerText = t.autoTimeCustomText || '🕒 Ко времени';
+      const elAutoNote = document.getElementById('auto-price-agreement-note');
+      if (elAutoNote) elAutoNote.innerHTML = t.autoPriceNoteText || '';
+
+      const elTabHm = document.getElementById('label-tab-handyman');
+      if (elTabHm) elTabHm.innerText = t.tabHandyman || 'Мастер';
+      const elHmBadge = document.getElementById('handyman-badge-tag');
+      if (elHmBadge) elHmBadge.innerText = t.hmBadgeTag || 'ПРОВЕРЕННЫЙ СПЕЦИАЛИСТ';
+      const elHmTitle = document.getElementById('handyman-service-title');
+      if (elHmTitle) elHmTitle.innerText = t.hmTitle || 'Экспресс-мастер на дом';
+      const elHmDesc = document.getElementById('handyman-service-desc');
+      if (elHmDesc) elHmDesc.innerText = t.hmDesc || '';
+      const elHmCat = document.getElementById('label-handyman-category');
+      if (elHmCat) elHmCat.innerHTML = `<span>⚙️</span> ${t.hmCatTitle}`;
+      const elHmMountT = document.getElementById('label-hm-mount-title');
+      if (elHmMountT) elHmMountT.innerText = t.hmMountTitle;
+      const elHmMountS = document.getElementById('label-hm-mount-sub');
+      if (elHmMountS) elHmMountS.innerText = t.hmMountSub;
+      const elHmSanT = document.getElementById('label-hm-san-title');
+      if (elHmSanT) elHmSanT.innerText = t.hmSanTitle;
+      const elHmSanS = document.getElementById('label-hm-san-sub');
+      if (elHmSanS) elHmSanS.innerText = t.hmSanSub;
+      const elHmElecT = document.getElementById('label-hm-elec-title');
+      if (elHmElecT) elHmElecT.innerText = t.hmElecTitle;
+      const elHmElecS = document.getElementById('label-hm-elec-sub');
+      if (elHmElecS) elHmElecS.innerText = t.hmElecSub;
+      const elHmFurnT = document.getElementById('label-hm-furn-title');
+      if (elHmFurnT) elHmFurnT.innerText = t.hmFurnTitle;
+      const elHmFurnS = document.getElementById('label-hm-furn-sub');
+      if (elHmFurnS) elHmFurnS.innerText = t.hmFurnSub;
+      const elHmFormT = document.getElementById('label-hm-form-title');
+      if (elHmFormT) elHmFormT.innerText = t.hmFormTitle;
+      const elHmAddr = document.getElementById('label-hm-address');
+      if (elHmAddr) elHmAddr.innerText = t.hmAddrLabel;
+      const inputHmAddr = document.getElementById('input-hm-address');
+      if (inputHmAddr) inputHmAddr.placeholder = t.hmAddrPlaceholder;
+      const elHmDescL = document.getElementById('label-hm-desc');
+      if (elHmDescL) elHmDescL.innerText = t.hmDescLabel;
+      const inputHmDescEl = document.getElementById('input-hm-desc');
+      if (inputHmDescEl) inputHmDescEl.placeholder = t.hmDescPlaceholder;
+      const elHmTimeL = document.getElementById('label-hm-time');
+      if (elHmTimeL) elHmTimeL.innerText = t.hmTimeLabel;
+      const btnHmTimeNowEl = document.getElementById('btn-hm-time-now');
+      if (btnHmTimeNowEl) btnHmTimeNowEl.innerText = t.hmTimeNow;
+      const btnHmTimeCustEl = document.getElementById('btn-hm-time-custom');
+      if (btnHmTimeCustEl) btnHmTimeCustEl.innerText = t.hmTimeCustom;
+      const elHmNote = document.getElementById('hm-price-note');
+      if (elHmNote) elHmNote.innerHTML = t.hmPriceNote;
+
+      const elQtyTitle = document.getElementById('label-quantity-title');
+      if (elQtyTitle) elQtyTitle.innerText = t.qtyTitle;
+      const elDiscountBanner = document.getElementById('label-discount-banner');
+      if (elDiscountBanner) elDiscountBanner.innerText = t.discountTierText;
+      const elMQty = document.getElementById('m-label-qty');
+      if (elMQty) elMQty.innerText = t.mQtyLabel;
+      const elMDisc = document.getElementById('m-label-discount');
+      if (elMDisc) elMDisc.innerText = t.mDiscountLabel;
+
+      renderPremiumCards();
+      renderStarsCards();
+      updateCheckoutBar();
+      renderFAQ();
+
+      ['ru', 'uz', 'en'].forEach(l => {
+        const btn = document.getElementById(`lang-${l}`);
+        if (btn) {
+          if (l === lang) {
+            btn.className = 'px-2 py-1 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black shadow transition';
+          } else {
+            btn.className = 'px-2 py-1 rounded-lg text-slate-400 hover:text-white transition';
+          }
+        }
+      });
+    }
+
+    function renderPremiumCards() {
+      const container = document.getElementById('premium-cards-container');
+      container.innerHTML = '';
+      const items = currentPremSubTab === 'no_login' ? PRICING.premium_no_login : PRICING.premium_with_login;
+
+      items.forEach(item => {
+        const isSelected = selectedItem.id === item.id;
+        const card = document.createElement('div');
+        card.className = `p-4 rounded-3xl transition-all cursor-pointer flex items-center justify-between ${
+          isSelected ? 'luxury-card-selected' : 'luxury-card'
+        }`;
+
+        card.onclick = () => {
+          selectedItem = item;
+          if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+          renderPremiumCards();
+          updateCheckoutBar();
+        };
+
+        const monthWord = currentLang === 'ru' 
+          ? (item.months === 1 ? '1 месяц' : (item.months === 3 ? '3 месяца' : `${item.months} месяцев`))
+          : (currentLang === 'uz' ? `${item.months} oy` : `${item.months} month${item.months > 1 ? 's' : ''}`);
+
+        const descText = currentPremSubTab === 'no_login' 
+          ? (currentLang === 'ru' ? 'Официальный подарок' : (currentLang === 'uz' ? "Rasmiy sovg'a" : 'Official gift'))
+          : (currentLang === 'ru' ? 'Код авторизации' : (currentLang === 'uz' ? 'Kod bilan faollashtirish' : 'Activation code'));
+
+        const badgeHtml = item.badge 
+          ? `<span class="text-[9px] font-black px-2 py-0.5 rounded-full ${isSelected ? 'bg-amber-500 text-slate-950 badge-glow' : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'}">${item.badge[currentLang]}</span>` 
+          : '';
+
+        card.innerHTML = `
+          <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-2xl ${isSelected ? 'bg-gradient-to-tr from-amber-500 to-yellow-300 text-slate-950 font-black shadow-lg shadow-amber-500/30' : 'bg-[#151e2e] text-amber-400 border border-amber-500/20'} flex items-center justify-center font-bold text-lg">
+              ${currentPremSubTab === 'no_login' ? '⚡️' : '🔑'}
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-sm sm:text-base font-extrabold text-white font-heading">${monthWord}</span>
+                ${badgeHtml}
+              </div>
+              <span class="text-[11px] text-slate-400 font-medium tracking-tight">${descText}</span>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-sm sm:text-base font-black font-mono-num ${isSelected ? 'gold-gradient-text' : 'text-white'}">${formatPrice(item.price)}</div>
+            <div class="text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'text-amber-400' : 'text-slate-500'}">
+              ${isSelected ? '● ' + (currentLang === 'ru' ? 'Выбрано' : (currentLang === 'uz' ? 'Tanlandi' : 'Selected')) : (currentLang === 'ru' ? 'Выбрать' : (currentLang === 'uz' ? 'Tanlash' : 'Select'))}
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderStarsCards() {
+      const container = document.getElementById('stars-cards-container');
+      container.innerHTML = '';
+
+      PRICING.stars.forEach(item => {
+        const isSelected = selectedItem.id === item.id;
+        const card = document.createElement('div');
+        card.className = `p-3.5 rounded-3xl transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between ${
+          isSelected ? 'luxury-card-selected' : 'luxury-card'
+        }`;
+
+        card.onclick = () => {
+          selectedItem = item;
+          if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+          renderStarsCards();
+          updateCheckoutBar();
+        };
+
+        const badgeHtml = item.badge 
+          ? `<span class="text-[8px] font-black px-1.5 py-0.5 rounded-md ${isSelected ? 'bg-amber-400 text-slate-950 font-black' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}">${item.badge[currentLang]}</span>` 
+          : '';
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-2xl filter drop-shadow">🌟</span>
+            ${badgeHtml}
+          </div>
+          <div>
+            <div class="text-base sm:text-lg font-black text-white flex items-center gap-1 font-heading">
+              <span class="font-mono-num">${item.count}</span> <span class="text-xs gold-gradient-text font-bold uppercase tracking-wider">Stars</span>
+            </div>
+            <div class="text-xs sm:text-sm font-black text-emerald-400 mt-1 font-mono-num">${formatPrice(item.price)}</div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function updateCheckoutBar() {
+      const t = I18N[currentLang];
+      const qtySection = document.getElementById('section-quantity');
+
+      if (currentMainTab === 'auto') {
+        if (qtySection) qtySection.classList.add('hidden');
+        const subName = currentAutoSubService === 'sober' ? (t.autoSubSober || 'Трезвый водитель') : (t.autoSubService || 'Прикурить авто');
+        const icon = currentAutoSubService === 'sober' ? '🍷' : '⚡️';
+        document.getElementById('bar-calc-breakdown').innerText = `${icon} ${subName}`;
+        document.getElementById('bar-total-price').innerText = t.autoPriceAgreed || 'По договоренности';
+        document.getElementById('btn-submit-text').innerText = currentAutoSubService === 'sober' ? (t.btnAutoSubmitText || 'Вызвать водителя') : (t.btnJumpSubmitText || 'Вызвать мастера');
+        return;
+      }
+
+      if (currentMainTab === 'handyman') {
+        if (qtySection) qtySection.classList.add('hidden');
+        const catMap = {
+          mount: t.hmMountTitle || 'Монтаж & Карнизы',
+          sanitary: t.hmSanTitle || 'Сантехника',
+          electric: t.hmElecTitle || 'Электрика',
+          furniture: t.hmFurnTitle || 'Сборка мебели'
+        };
+        const iconMap = { mount: '🔨', sanitary: '🚰', electric: '💡', furniture: '🪑' };
+        document.getElementById('bar-calc-breakdown').innerText = `${iconMap[selectedHandymanCategory]} ${catMap[selectedHandymanCategory]}`;
+        document.getElementById('bar-total-price').innerText = t.autoPriceAgreed || 'По договоренности';
+        document.getElementById('btn-submit-text').innerText = t.btnHmSubmitText || 'Вызвать мастера на дом';
+        return;
+      }
+
+      if (qtySection) qtySection.classList.remove('hidden');
+
+      const unitPrice = selectedItem.price;
+      const rawTotal = unitPrice * currentQuantity;
+
+      let discountPercent = 0;
+      let discountPercentInt = 0;
+      if (currentQuantity >= 5) {
+        discountPercent = 0.10;
+        discountPercentInt = 10;
+      } else if (currentQuantity >= 3) {
+        discountPercent = 0.07;
+        discountPercentInt = 7;
+      } else if (currentQuantity >= 2) {
+        discountPercent = 0.05;
+        discountPercentInt = 5;
+      }
+
+      const discountSum = Math.round((rawTotal * discountPercent) / 100) * 100;
+      const finalPrice = rawTotal - discountSum;
+
+      const boxDiscountApplied = document.getElementById('box-discount-applied');
+      const discountAppliedText = document.getElementById('discount-applied-text');
+      const discountSavedAmount = document.getElementById('discount-saved-amount');
+
+      if (discountPercent > 0) {
+        boxDiscountApplied.classList.remove('hidden');
+        discountAppliedText.innerText = `${t.discountBadge} -${discountPercentInt}% (${currentQuantity} ${t.qtyWord})`;
+        discountSavedAmount.innerText = `-${formatPrice(discountSum)}`;
+      } else {
+        boxDiscountApplied.classList.add('hidden');
+      }
+
+      const qtyStr = currentQuantity > 1 ? ` (${currentQuantity}x)` : '';
+      if (isVisitEnabled) {
+        document.getElementById('bar-calc-breakdown').innerText = `${t.totalLabel} ${formatPrice(finalPrice)}${qtyStr} (${t.visitInPms})`;
+        document.getElementById('btn-submit-text').innerText = t.btnSubmitVisit;
+      } else {
+        const discountLabelText = currentLang === 'ru' ? 'Скидка' : (currentLang === 'uz' ? 'Chegirma' : 'Discount');
+        document.getElementById('bar-calc-breakdown').innerText = discountPercent > 0 
+          ? `${t.totalLabel} ${formatPrice(rawTotal)} → ${discountLabelText} ${discountPercentInt}%` 
+          : `${t.totalLabel} ${formatPrice(finalPrice)}${qtyStr}`;
+        document.getElementById('btn-submit-text').innerText = t.btnSubmit;
+      }
+
+      document.getElementById('bar-total-price').innerText = formatPrice(finalPrice);
+    }
+
+    function renderFAQ() {
+      const box = document.getElementById('faq-content-box');
+      if (currentLang === 'ru') {
+        box.innerHTML = `
+          <div class="p-3.5 rounded-2xl bg-[#090d16] border border-amber-500/20">
+            <h4 class="font-bold text-amber-300 mb-1">🕒 Время работы для выездов:</h4>
+            <p class="text-slate-300">• Понедельник — Пятница: <strong>после 18:00</strong><br>• Суббота — Воскресенье: <strong>по договоренности</strong></p>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-[#090d16] border border-slate-800">
+            <h4 class="font-bold text-white mb-1">🚗 Как согласовывается выезд мастера?</h4>
+            <p class="text-slate-400">Вы оставляете номер телефона или Telegram ник. Мы связываемся в личных сообщениях, уточняем адрес, ориентир и рассчитываем дорогу.</p>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-[#090d16] border border-slate-800">
+            <h4 class="font-bold text-white mb-1">💳 Способы оплаты:</h4>
+            <p class="text-slate-400">Перевод на карту Uzcard / Humo либо наличными / переводом прямо мастеру при встрече.</p>
+          </div>
+        `;
+      } else if (currentLang === 'uz') {
+        box.innerHTML = `
+          <div class="p-3.5 rounded-2xl bg-[#090d16] border border-amber-500/20">
+            <h4 class="font-bold text-amber-300 mb-1">🕒 Tashriflar uchun ish vaqti:</h4>
+            <p class="text-slate-300">• Dushanba — Juma: <strong>18:00 dan keyin</strong><br>• Shanba — Yakshanba: <strong>kelishuv asosida</strong></p>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-[#090d16] border border-slate-800">
+            <h4 class="font-bold text-white mb-1">🚗 Tashrif qanday kelishiladi?</h4>
+            <p class="text-slate-400">Telefon raqam yoki Telegram nik qoldirasiz. Biz sizga yozib, manzil va yo'l haqini kelishib olamiz.</p>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-[#090d16] border border-slate-800">
+            <h4 class="font-bold text-white mb-1">💳 To'lov usullari:</h4>
+            <p class="text-slate-400">Uzcard / Humo kartalariga o'tkazma yoki mutaxassisga joyida naqd to'lash.</p>
+          </div>
+        `;
+      } else {
+        box.innerHTML = `
+          <div class="p-3.5 rounded-2xl bg-[#090d16] border border-amber-500/20">
+            <h4 class="font-bold text-amber-300 mb-1">🕒 Visit Working Hours:</h4>
+            <p class="text-slate-300">• Monday — Friday: <strong>After 18:00</strong><br>• Saturday — Sunday: <strong>By agreement</strong></p>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-[#090d16] border border-slate-800">
+            <h4 class="font-bold text-white mb-1">🚗 How does the master visit work?</h4>
+            <p class="text-slate-400">Leave your phone or Telegram handle. We will contact you directly to agree on meeting place and road cost.</p>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-[#090d16] border border-slate-800">
+            <h4 class="font-bold text-white mb-1">💳 Payment Methods:</h4>
+            <p class="text-slate-400">Uzcard / Humo card transfer or cash/card on-site directly to specialist.</p>
+          </div>
+        `;
+      }
+    }
+
+    const btnQtyMinus = document.getElementById('btn-qty-minus');
+    const btnQtyPlus = document.getElementById('btn-qty-plus');
+    const quantityDisplay = document.getElementById('quantity-display');
+
+    btnQtyMinus.onclick = () => {
+      if (currentQuantity > 1) {
+        currentQuantity--;
+        quantityDisplay.innerText = currentQuantity;
+        updateCheckoutBar();
+        if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+      }
+    };
+
+    btnQtyPlus.onclick = () => {
+      if (currentQuantity < 10) {
+        currentQuantity++;
+        quantityDisplay.innerText = currentQuantity;
+        updateCheckoutBar();
+        if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+      } else {
+        showToast('Максимум 10 шт за один заказ', 'ℹ️');
+      }
+    };
+
+    const toggleVisit = document.getElementById('toggle-visit');
+    const visitOptionsBox = document.getElementById('visit-options-box');
+
+    toggleVisit.onchange = () => {
+      isVisitEnabled = toggleVisit.checked;
+      const t = I18N[currentLang];
+      if (isVisitEnabled) {
+        visitOptionsBox.classList.remove('hidden');
+        document.getElementById('cash-desc-text').innerText = t.payCashTitle;
+        showToast(currentLang === 'ru' ? 'Включен выезд мастера' : (currentLang === 'uz' ? 'Tashrif tanlandi' : 'Visit enabled'), '🚗');
+      } else {
+        visitOptionsBox.classList.add('hidden');
+        document.getElementById('cash-desc-text').innerText = t.payCashSub;
+        if (selectedPayment === 'cash') {
+          document.getElementById('pay-card').click();
+        }
+      }
+      updateCheckoutBar();
+      if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
+    };
+
+    const tabPremium = document.getElementById('tab-premium');
+    const tabStars = document.getElementById('tab-stars');
+    const tabAuto = document.getElementById('tab-auto');
+    const tabHandyman = document.getElementById('tab-handyman');
+    const contentPremium = document.getElementById('content-premium');
+    const contentStars = document.getElementById('content-stars');
+    const contentAuto = document.getElementById('content-auto');
+    const contentHandyman = document.getElementById('content-handyman');
+
+    const recipientSection = document.getElementById('input-recipient')?.closest('section');
+    const visitToggleBox = document.getElementById('toggle-visit')?.closest('section');
+    const payMethodBox = document.getElementById('pay-card')?.closest('section');
+
+    function resetMainTabsStyles() {
+      const inactive = 'flex-1 min-w-[70px] py-2 px-2 rounded-xl font-extrabold text-[11px] sm:text-xs transition-all duration-300 flex items-center justify-center gap-1 text-slate-400 hover:text-white whitespace-nowrap';
+      tabPremium.className = inactive;
+      tabStars.className = inactive;
+      tabAuto.className = inactive;
+      tabHandyman.className = inactive;
+
+      contentPremium.classList.add('hidden');
+      contentStars.classList.add('hidden');
+      contentAuto.classList.add('hidden');
+      contentHandyman.classList.add('hidden');
+    }
+
+    const activeTabClass = 'flex-1 min-w-[76px] py-2 px-2 rounded-xl font-extrabold text-[11px] sm:text-xs transition-all duration-300 flex items-center justify-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-lg shadow-amber-500/25 whitespace-nowrap';
+
+    tabPremium.onclick = () => {
+      currentMainTab = 'premium';
+      resetMainTabsStyles();
+      tabPremium.className = activeTabClass;
+      contentPremium.classList.remove('hidden');
+
+      if (recipientSection) recipientSection.classList.remove('hidden');
+      if (visitToggleBox) visitToggleBox.classList.remove('hidden');
+      if (payMethodBox) payMethodBox.classList.remove('hidden');
+
+      selectedItem = (currentPremSubTab === 'no_login' ? PRICING.premium_no_login : PRICING.premium_with_login)[0];
+      renderPremiumCards();
+      updateCheckoutBar();
+      if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
+    };
+
+    tabStars.onclick = () => {
+      currentMainTab = 'stars';
+      resetMainTabsStyles();
+      tabStars.className = activeTabClass;
+      contentStars.classList.remove('hidden');
+
+      if (recipientSection) recipientSection.classList.remove('hidden');
+      if (visitToggleBox) visitToggleBox.classList.remove('hidden');
+      if (payMethodBox) payMethodBox.classList.remove('hidden');
+
+      selectedItem = PRICING.stars[0];
+      renderStarsCards();
+      updateCheckoutBar();
+      if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
+    };
+
+    tabAuto.onclick = () => {
+      currentMainTab = 'auto';
+      resetMainTabsStyles();
+      tabAuto.className = activeTabClass;
+      contentAuto.classList.remove('hidden');
+
+      if (recipientSection) recipientSection.classList.add('hidden');
+      if (visitToggleBox) visitToggleBox.classList.add('hidden');
+      if (payMethodBox) payMethodBox.classList.add('hidden');
+
+      updateCheckoutBar();
+      if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
+    };
+
+    tabHandyman.onclick = () => {
+      currentMainTab = 'handyman';
+      resetMainTabsStyles();
+      tabHandyman.className = activeTabClass;
+      contentHandyman.classList.remove('hidden');
+
+      if (recipientSection) recipientSection.classList.add('hidden');
+      if (visitToggleBox) visitToggleBox.classList.add('hidden');
+      if (payMethodBox) payMethodBox.classList.add('hidden');
+
+      updateCheckoutBar();
+      if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
+    };
+
+    const btnHmMount = document.getElementById('btn-hm-mount');
+    const btnHmSan = document.getElementById('btn-hm-sanitary');
+    const btnHmElec = document.getElementById('btn-hm-electric');
+    const btnHmFurn = document.getElementById('btn-hm-furniture');
+
+    function resetHmButtons() {
+      const normal = 'p-3 rounded-2xl border text-left transition bg-[#0a0f18] border-slate-700/80 text-slate-300 hover:text-white';
+      btnHmMount.className = normal;
+      btnHmSan.className = normal;
+      btnHmElec.className = normal;
+      btnHmFurn.className = normal;
+    }
+
+    const hmActive = 'p-3 rounded-2xl border text-left transition bg-amber-500/20 text-amber-300 border-amber-500/40';
+
+    btnHmMount.onclick = () => {
+      selectedHandymanCategory = 'mount';
+      resetHmButtons();
+      btnHmMount.className = hmActive;
+      updateCheckoutBar();
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    };
+
+    btnHmSan.onclick = () => {
+      selectedHandymanCategory = 'sanitary';
+      resetHmButtons();
+      btnHmSan.className = hmActive;
+      updateCheckoutBar();
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    };
+
+    btnHmElec.onclick = () => {
+      selectedHandymanCategory = 'electric';
+      resetHmButtons();
+      btnHmElec.className = hmActive;
+      updateCheckoutBar();
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    };
+
+    btnHmFurn.onclick = () => {
+      selectedHandymanCategory = 'furniture';
+      resetHmButtons();
+      btnHmFurn.className = hmActive;
+      updateCheckoutBar();
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    };
+
+    const btnHmTimeNow = document.getElementById('btn-hm-time-now');
+    const btnHmTimeCustom = document.getElementById('btn-hm-time-custom');
+    const inputHmTimeVal = document.getElementById('input-hm-time-val');
+
+    btnHmTimeNow.onclick = () => {
+      selectedHandymanTime = 'now';
+      btnHmTimeNow.className = 'py-2 px-3 rounded-xl text-xs font-bold transition bg-amber-500/20 text-amber-300 border border-amber-500/40 text-center shadow-sm';
+      btnHmTimeCustom.className = 'py-2 px-3 rounded-xl text-xs font-bold transition bg-slate-900 border border-slate-800 text-slate-400 hover:text-white text-center';
+      inputHmTimeVal.classList.add('hidden');
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    };
+
+    btnHmTimeCustom.onclick = () => {
+      selectedHandymanTime = 'custom';
+      btnHmTimeCustom.className = 'py-2 px-3 rounded-xl text-xs font-bold transition bg-amber-500/20 text-amber-300 border border-amber-500/40 text-center shadow-sm';
+      btnHmTimeNow.className = 'py-2 px-3 rounded-xl text-xs font-bold transition bg-slate-900 border border-slate-800 text-slate-400 hover:text-white text-center';
+      inputHmTimeVal.classList.remove('hidden');
+      inputHmTimeVal.focus();
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    };
+
+    const subtabNoLogin = document.getElementById('subtab-no-login');
+    const subtabWithLogin = document.getElementById('subtab-with-login');
+    const descNoLogin = document.getElementById('desc-no-login');
+    const descWithLogin = document.getElementById('desc-with-login');
+
+    subtabNoLogin.onclick = () => {
+      currentPremSubTab = 'no_login';
+      subtabNoLogin.className = 'flex-1 py-2 px-2 rounded-lg font-bold transition text-center bg-[#172236] text-amber-300 border border-amber-500/30 shadow-md';
+      subtabWithLogin.className = 'flex-1 py-2 px-2 rounded-lg font-bold transition text-center text-slate-400 hover:text-slate-200 border-transparent';
+      descNoLogin.classList.remove('hidden');
+      descWithLogin.classList.add('hidden');
+      selectedItem = PRICING.premium_no_login[0];
+      renderPremiumCards();
+      updateCheckoutBar();
+      if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
+    };
+
+    subtabWithLogin.onclick = () => {
+      currentPremSubTab = 'with_login';
+      subtabWithLogin.className = 'flex-1 py-2 px-2 rounded-lg font-bold transition text-center bg-purple-900/50 text-purple-200 border border-purple-500/40 shadow-md';
+      subtabNoLogin.className = 'flex-1 py-2 px-2 rounded-lg font-bold transition text-center text-slate-400 hover:text-slate-200 border-transparent';
+      descWithLogin.classList.remove('hidden');
+      descNoLogin.classList.add('hidden');
+      selectedItem = PRICING.premium_with_login[0];
+      renderPremiumCards();
+      updateCheckoutBar();
+      if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
+    };
+
+    const subtabSober = document.getElementById('subtab-sober');
+    const subtabService = document.getElementById('subtab-service');
+    const autoServiceTitle = document.getElementById('auto-service-title');
+    const autoServiceDesc = document.getElementById('auto-service-desc');
+    const autoBadgeTag = document.getElementById('auto-badge-tag');
+    const autoServiceIcon = document.getElementById('auto-service-icon');
+    const boxAutoTo = document.getElementById('box-auto-to');
+    const boxAutoGearbox = document.getElementById('box-auto-gearbox');
+
+    subtabSober.onclick = () => {
+      currentAutoSubService = 'sober';
+      subtabSober.className = 'flex-1 py-2 px-1.5 rounded-lg font-bold transition text-center bg-[#172236] text-amber-300 border border-amber-500/30 shadow-md';
+      subtabService.className = 'flex-1 py-2 px-1.5 rounded-lg font-bold transition text-center text-slate-400 hover:text-slate-200';
+      const t = I18N[currentLang];
+      autoServiceTitle.innerText = t.autoSoberTitle;
+      autoServiceDesc.innerText = t.autoSoberDesc;
+      autoBadgeTag.innerText = t.autoBadgeTag;
+      if (autoServiceIcon) autoServiceIcon.innerText = '🍷';
+      if (boxAutoTo) boxAutoTo.classList.remove('hidden');
+      if (boxAutoGearbox) boxAutoGearbox.classList.remove('hidden');
+      updateCheckoutBar();
+      if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
+    };
+
+    subtabService.onclick = () => {
+      currentAutoSubService = 'jump';
+      subtabService.className = 'flex-1 py-2 px-1.5 rounded-lg font-bold transition text-center bg-[#172236] text-amber-300 border border-amber-500/30 shadow-md';
+      subtabSober.className = 'flex-1 py-2 px-1.5 rounded-lg font-bold transition text-center text-slate-400 hover:text-slate-200';
+      const t = I18N[currentLang];
+      autoServiceTitle.innerText = t.autoServiceTitle;
+      autoServiceDesc.innerText = t.autoServiceDesc;
+      autoBadgeTag.innerText = t.autoBadgeJumpTag;
+      if (autoServiceIcon) autoServiceIcon.innerText = '⚡️';
+      if (boxAutoTo) boxAutoTo.classList.add('hidden');
+      if (boxAutoGearbox) boxAutoGearbox.classList.add('hidden');
+      updateCheckoutBar();
+      if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
+    };
+
+    const btnGearAuto = document.getElementById('btn-gear-auto');
+    const btnGearManual = document.getElementById('btn-gear-manual');
+
+    btnGearAuto.onclick = () => {
+      selectedGearbox = 'auto';
+      btnGearAuto.className = 'py-2 px-2 rounded-xl text-xs font-bold transition bg-amber-500/20 text-amber-300 border border-amber-500/40 text-center';
+      btnGearManual.className = 'py-2 px-2 rounded-xl text-xs font-bold transition bg-slate-900 border border-slate-800 text-slate-400 hover:text-white text-center';
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    };
+
+    btnGearManual.onclick = () => {
+      selectedGearbox = 'manual';
+      btnGearManual.className = 'py-2 px-2 rounded-xl text-xs font-bold transition bg-amber-500/20 text-amber-300 border border-amber-500/40 text-center';
+      btnGearAuto.className = 'py-2 px-2 rounded-xl text-xs font-bold transition bg-slate-900 border border-slate-800 text-slate-400 hover:text-white text-center';
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    };
+
+    const btnTimeNow = document.getElementById('btn-time-now');
+    const btnTimeCustom = document.getElementById('btn-time-custom');
+    const inputAutoTimeVal = document.getElementById('input-auto-time-val');
+
+    btnTimeNow.onclick = () => {
+      selectedDepartureTime = 'now';
+      btnTimeNow.className = 'py-2 px-3 rounded-xl text-xs font-bold transition bg-amber-500/20 text-amber-300 border border-amber-500/40 text-center shadow-sm';
+      btnTimeCustom.className = 'py-2 px-3 rounded-xl text-xs font-bold transition bg-slate-900 border border-slate-800 text-slate-400 hover:text-white text-center';
+      inputAutoTimeVal.classList.add('hidden');
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    };
+
+    btnTimeCustom.onclick = () => {
+      selectedDepartureTime = 'custom';
+      btnTimeCustom.className = 'py-2 px-3 rounded-xl text-xs font-bold transition bg-amber-500/20 text-amber-300 border border-amber-500/40 text-center shadow-sm';
+      btnTimeNow.className = 'py-2 px-3 rounded-xl text-xs font-bold transition bg-slate-900 border border-slate-800 text-slate-400 hover:text-white text-center';
+      inputAutoTimeVal.classList.remove('hidden');
+      inputAutoTimeVal.focus();
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    };
+
+    document.getElementById('btn-self-recipient').onclick = () => {
+      inputRecipient.value = defaultUsername;
+      showToast(I18N[currentLang].toastSelfSet, '👤');
+    };
+
+    const payCard = document.getElementById('pay-card');
+    const payCash = document.getElementById('pay-cash');
+
+    payCard.onclick = () => {
+      selectedPayment = 'card';
+      payCard.className = 'p-3 rounded-2xl border text-left transition flex items-center gap-2.5 bg-amber-500/10 border-amber-500 text-white';
+      payCash.className = 'p-3 rounded-2xl border text-left transition flex items-center gap-2.5 bg-[#0a0f18] border-slate-700 text-slate-300 hover:text-white';
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    };
+
+    payCash.onclick = () => {
+      if (!isVisitEnabled) {
+        showToast(currentLang === 'ru' ? 'Оплата на месте доступна только с выездом мастера!' : 'Faqat tashrif bilan mavjud!', '⚠️');
+        toggleVisit.checked = true;
+        toggleVisit.onchange();
+      }
+      selectedPayment = 'cash';
+      payCash.className = 'p-3 rounded-2xl border text-left transition flex items-center gap-2.5 bg-amber-500/15 border-amber-500 text-white';
+      payCard.className = 'p-3 rounded-2xl border text-left transition flex items-center gap-2.5 bg-[#0a0f18] border-slate-700 text-slate-300 hover:text-white';
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    };
+
+    const modalPayment = document.getElementById('modal-payment');
+    const btnSubmitOrder = document.getElementById('btn-submit-order');
+    const btnCloseModal = document.getElementById('btn-close-modal');
+
+    btnSubmitOrder.onclick = () => {
+      const t = I18N[currentLang];
+
+      if (currentMainTab === 'handyman') {
+        const addrVal = document.getElementById('input-hm-address').value.trim();
+        const descVal = document.getElementById('input-hm-desc').value.trim();
+        const phoneVal = document.getElementById('input-hm-phone').value.trim();
+        const tgVal = document.getElementById('input-hm-tg').value.trim();
+
+        if (!addrVal) {
+          showToast(t.toastHmReqAddress || 'Укажите адрес вызова мастера!', '⚠️');
+          document.getElementById('input-hm-address').focus();
+          return;
+        }
+
+        if (!descVal) {
+          showToast(t.toastHmReqDesc || 'Опишите задачу!', '⚠️');
+          document.getElementById('input-hm-desc').focus();
+          return;
+        }
+
+        if (!phoneVal && !tgVal) {
+          showToast(t.toastHmReqContact || 'Укажите номер телефона!', '⚠️');
+          document.getElementById('input-hm-phone').focus();
+          return;
+        }
+
+        const catNames = {
+          mount: t.hmMountTitle || 'Монтаж & Карнизы',
+          sanitary: t.hmSanTitle || 'Сантехника',
+          electric: t.hmElecTitle || 'Электрика',
+          furniture: t.hmFurnTitle || 'Сборка мебели'
+        };
+        const catIcons = { mount: '🔨', sanitary: '🚰', electric: '💡', furniture: '🪑' };
+        const timeVal = selectedHandymanTime === 'now' ? 'Срочно (30-50 мин)' : (document.getElementById('input-hm-time-val').value.trim() || 'Ко времени');
+
+        document.getElementById('modal-header-icon').innerText = catIcons[selectedHandymanCategory];
+        document.getElementById('modal-header-title').innerText = 'Вызов мастера на дом';
+        document.getElementById('modal-item-name').innerText = `Мастер: ${catNames[selectedHandymanCategory]}`;
+        document.getElementById('modal-recipient').innerText = `${phoneVal || ''} ${tgVal || ''}`;
+        document.getElementById('modal-total').innerText = t.autoPriceAgreed || 'По договоренности';
+
+        const rowQty = document.getElementById('modal-qty-row');
+        if (rowQty) rowQty.classList.add('hidden');
+        const rowDisc = document.getElementById('modal-discount-row');
+        if (rowDisc) rowDisc.classList.add('hidden');
+
+        const visitInfoRow = document.getElementById('modal-visit-info-row');
+        visitInfoRow.classList.remove('hidden');
+        visitInfoRow.innerHTML = `
+          <div class="font-bold flex items-center gap-1.5 text-xs text-amber-300">
+            <span>🛠</span> Детали выезда экспресс-мастера:
+          </div>
+          <div>• <strong>Адрес:</strong> <span class="text-white">${addrVal}</span></div>
+          <div>• <strong>Задача:</strong> <span class="text-slate-300">${descVal}</span></div>
+          <div>• <strong>Время:</strong> <span class="text-emerald-400 font-bold">${timeVal}</span></div>
+          <div class="text-[10px] text-amber-300/80 pt-0.5">• Опрятный мастер со своими профессиональными инструментами</div>
+        `;
+
+        document.getElementById('modal-road-fee-note').classList.add('hidden');
+        document.getElementById('requisites-box').classList.add('hidden');
+        document.getElementById('receipt-upload-box').classList.add('hidden');
+
+        const cashBox = document.getElementById('cash-notice-box');
+        cashBox.classList.remove('hidden');
+        cashBox.innerHTML = `
+          <div class="font-bold text-white flex items-center gap-1.5"><span>💎</span> Оплата по результату</div>
+          <p class="text-[11px] text-emerald-300/90">Мастер согласует стоимость с вами перед началом работ. Оплата наличными или картой после завершения.</p>
+        `;
+
+        document.getElementById('btn-confirm-text').innerText = '🚀 Отправить заявку мастеру';
+        modalPayment.classList.remove('hidden');
+        if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+        return;
+      }
+
+      if (currentMainTab === 'auto') {
+        const fromVal = document.getElementById('input-auto-from').value.trim();
+        const toVal = document.getElementById('input-auto-to').value.trim();
+        const phoneVal = document.getElementById('input-auto-phone').value.trim();
+        const tgVal = document.getElementById('input-auto-tg').value.trim();
+
+        if (!fromVal) {
+          showToast(t.toastAutoReqPoints || 'Укажите местонахождение авто!', '⚠️');
+          document.getElementById('input-auto-from').focus();
+          return;
+        }
+
+        if (currentAutoSubService === 'sober' && !toVal) {
+          showToast(t.toastAutoReqPointsFull || 'Укажите адреса откуда и куда!', '⚠️');
+          document.getElementById('input-auto-to').focus();
+          return;
+        }
+
+        if (!phoneVal && !tgVal) {
+          showToast(t.toastAutoReqContact || 'Укажите телефон для связи!', '⚠️');
+          document.getElementById('input-auto-phone').focus();
+          return;
+        }
+
+        const carVal = document.getElementById('input-auto-car').value.trim() || 'Автомобиль клиента';
+        const gearboxName = selectedGearbox === 'auto' ? 'Автомат (АКПП)' : 'Механика (МКПП)';
+        const timeVal = selectedDepartureTime === 'now' ? 'Срочно (15-25 мин)' : (document.getElementById('input-auto-time-val').value.trim() || 'Ко времени');
+        const isSober = currentAutoSubService === 'sober';
+        const serviceName = isSober ? 'Трезвый водитель (с владельцем)' : 'Прикурить авто (Бустер 12V)';
+
+        document.getElementById('modal-header-icon').innerText = isSober ? '🍷' : '⚡️';
+        document.getElementById('modal-header-title').innerText = serviceName;
+        document.getElementById('modal-item-name').innerText = isSober 
+          ? `${serviceName} • ${carVal} (${gearboxName})`
+          : `${serviceName} • ${carVal}`;
+        document.getElementById('modal-recipient').innerText = `${phoneVal || ''} ${tgVal || ''}`;
+        document.getElementById('modal-total').innerText = t.autoPriceAgreed || 'По договоренности в ЛС';
+
+        const rowQty = document.getElementById('modal-qty-row');
+        if (rowQty) rowQty.classList.add('hidden');
+        const rowDisc = document.getElementById('modal-discount-row');
+        if (rowDisc) rowDisc.classList.add('hidden');
+
+        const visitInfoRow = document.getElementById('modal-visit-info-row');
+        visitInfoRow.classList.remove('hidden');
+        visitInfoRow.innerHTML = `
+          <div class="font-bold flex items-center gap-1.5 text-xs text-amber-300">
+            <span>${isSober ? '🍷' : '⚡️'}</span> ${isSober ? 'Маршрут (только с владельцем):' : 'Локация для запуска двигателя:'}
+          </div>
+          <div>• <strong>Где авто:</strong> <span class="text-white">${fromVal}</span></div>
+          ${isSober ? `<div>• <strong>Куда ехать:</strong> <span class="text-white">${toVal}</span></div>` : ''}
+          <div>• <strong>Автомобиль:</strong> ${carVal} ${isSober ? `(${gearboxName})` : ''}</div>
+          <div>• <strong>Время подачи:</strong> <span class="text-emerald-400 font-bold">${timeVal}</span></div>
+          <div class="text-[10px] text-amber-300/80 pt-0.5">• ${isSober ? 'Вождение строго в присутствии владельца машины' : 'Мастер приедет с пусковым бустером и проводами'}</div>
+        `;
+
+        document.getElementById('modal-road-fee-note').classList.add('hidden');
+        document.getElementById('requisites-box').classList.add('hidden');
+        document.getElementById('receipt-upload-box').classList.add('hidden');
+
+        const cashBox = document.getElementById('cash-notice-box');
+        cashBox.classList.remove('hidden');
+        cashBox.innerHTML = `
+          <div class="font-bold text-white flex items-center gap-1.5"><span>💬</span> Согласование стоимости</div>
+          <p class="text-[11px] text-emerald-300/90">Оператор свяжется с вами в Telegram или по телефону в течение нескольких минут для подтверждения выезда.</p>
+        `;
+
+        document.getElementById('btn-confirm-text').innerText = '🚀 Отправить заявку оператору';
+        modalPayment.classList.remove('hidden');
+        if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+        return;
+      }
+
+      const recipient = inputRecipient.value.trim();
+      if (!recipient) {
+        showToast(t.toastRecipientReq, '⚠️');
+        inputRecipient.focus();
+        return;
+      }
+
+      if (isVisitEnabled) {
+        const phone = document.getElementById('input-visit-phone').value.trim();
+        const tgNick = document.getElementById('input-visit-tg').value.trim();
+        if (!phone && !tgNick) {
+          showToast(t.toastContactReq, '⚠️');
+          document.getElementById('input-visit-phone').focus();
+          return;
+        }
+      }
+
+      const unitPrice = selectedItem.price;
+      const rawTotal = unitPrice * currentQuantity;
+      let discountPercent = 0;
+      let discountPercentInt = 0;
+      if (currentQuantity >= 5) {
+        discountPercent = 0.10;
+        discountPercentInt = 10;
+      } else if (currentQuantity >= 3) {
+        discountPercent = 0.07;
+        discountPercentInt = 7;
+      } else if (currentQuantity >= 2) {
+        discountPercent = 0.05;
+        discountPercentInt = 5;
+      }
+      const discountSum = Math.round((rawTotal * discountPercent) / 100) * 100;
+      const finalPrice = rawTotal - discountSum;
+
+      const itemName = selectedItem.count 
+        ? `${selectedItem.count} Stars` 
+        : (currentLang === 'ru' ? `${selectedItem.months} мес.` : `${selectedItem.months} month(s)`);
+
+      document.getElementById('modal-header-icon').innerText = '💳';
+      document.getElementById('modal-header-title').innerText = t.modalTitle;
+      document.getElementById('modal-item-name').innerText = selectedItem.count ? `${selectedItem.count} Telegram Stars` : `Telegram Premium (${itemName})`;
+      document.getElementById('modal-recipient').innerText = recipient;
+
+      const rowQty = document.getElementById('modal-qty-row');
+      if (rowQty) {
+        rowQty.classList.remove('hidden');
+        document.getElementById('modal-qty-val').innerText = `${currentQuantity} ${t.qtyWord}`;
+      }
+
+      const rowModalDiscount = document.getElementById('modal-discount-row');
+      if (discountPercent > 0) {
+        rowModalDiscount.classList.remove('hidden');
+        document.getElementById('modal-discount-val').innerText = `-${discountPercentInt}% (-${formatPrice(discountSum)})`;
+      } else {
+        rowModalDiscount.classList.add('hidden');
+      }
+
+      document.getElementById('modal-total').innerText = formatPrice(finalPrice);
+
+      const visitInfoRow = document.getElementById('modal-visit-info-row');
+      const roadFeeNote = document.getElementById('modal-road-fee-note');
+
+      if (isVisitEnabled) {
+        visitInfoRow.classList.remove('hidden');
+        roadFeeNote.classList.remove('hidden');
+        const phone = document.getElementById('input-visit-phone').value.trim() || '-';
+        const tgNick = document.getElementById('input-visit-tg').value.trim() || '-';
+        const loc = document.getElementById('input-visit-location').value.trim() || (currentLang === 'ru' ? 'уточняется в ЛС' : 'lichkada kelishiladi');
+        document.getElementById('modal-phone-val').innerText = phone;
+        document.getElementById('modal-tg-val').innerText = tgNick;
+        document.getElementById('modal-loc-val').innerText = loc;
+      } else {
+        visitInfoRow.classList.add('hidden');
+        roadFeeNote.classList.add('hidden');
+      }
+
+      const isCard = selectedPayment === 'card';
+      const reqBox = document.getElementById('requisites-box');
+      const cashBox = document.getElementById('cash-notice-box');
+      const receiptBox = document.getElementById('receipt-upload-box');
+      const btnConfirmText = document.getElementById('btn-confirm-text');
+
+      if (isCard) {
+        reqBox.classList.remove('hidden');
+        cashBox.classList.add('hidden');
+        receiptBox.classList.remove('hidden');
+        btnConfirmText.innerText = isVisitEnabled ? t.btnSendVisitReceipt : t.btnSendOrder;
+        receiptAttached = false;
+        document.getElementById('receipt-status-text').innerText = t.mReceiptStatus;
+        document.getElementById('receipt-dropzone').className = 'border-2 border-dashed border-slate-700 hover:border-amber-500 rounded-2xl p-4 text-center cursor-pointer transition bg-black/40';
+      } else {
+        reqBox.classList.add('hidden');
+        cashBox.classList.remove('hidden');
+        receiptBox.classList.add('hidden');
+        btnConfirmText.innerText = t.btnSendVisit;
+      }
+
+      modalPayment.classList.remove('hidden');
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+    };
+
+    btnCloseModal.onclick = () => {
+      modalPayment.classList.add('hidden');
+    };
+
+    document.getElementById('btn-copy-req').onclick = () => {
+      const text = document.getElementById('req-number').innerText;
+      navigator.clipboard.writeText(text).catch(() => {});
+      showToast(I18N[currentLang].toastCopied, '📋');
+    };
+
+    const receiptDropzone = document.getElementById('receipt-dropzone');
+    receiptDropzone.onclick = () => {
+      receiptAttached = true;
+      document.getElementById('receipt-status-text').innerHTML = `<span class="text-amber-400 font-bold">${I18N[currentLang].mReceiptStatusDone}</span>`;
+      receiptDropzone.className = 'border-2 border-amber-500 bg-amber-500/10 rounded-2xl p-4 text-center cursor-pointer transition';
+      showToast('Receipt attached', '📎');
+    };
+
+    document.getElementById('btn-confirm-payment').onclick = () => {
+      const isCard = selectedPayment === 'card';
+      const t = I18N[currentLang];
+      if (isCard && !receiptAttached && currentMainTab !== 'auto' && currentMainTab !== 'handyman') {
+        showToast(t.toastReceiptReq, '⚠️');
+        return;
+      }
+
+      const orderId = ordersHistory.length + 1;
+
+      // 1. ЗАКАЗ МАСТЕРА НА ДОМ
+      if (currentMainTab === 'handyman') {
+        const addrVal = document.getElementById('input-hm-address').value.trim();
+        const descVal = document.getElementById('input-hm-desc').value.trim();
+        const phoneVal = document.getElementById('input-hm-phone').value.trim();
+        const tgVal = document.getElementById('input-hm-tg').value.trim();
+        const catNames = { mount: 'Монтаж/карнизы', sanitary: 'Сантехника', electric: 'Электрика', furniture: 'Сборка мебели' };
+
+        const hmOrder = {
+          id: orderId,
+          item: `🛠 Мастер: ${catNames[selectedHandymanCategory]}`,
+          price: 0,
+          priceDisplay: t.autoPriceAgreed || 'По договоренности',
+          recipient: `${phoneVal || ''} ${tgVal || ''}`.trim(),
+          payment: 'После выполнения',
+          isHandyman: true,
+          route: `Адрес: ${addrVal}`,
+          status: 'Выезд мастера',
+          date: new Date().toLocaleDateString([], { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+        };
+
+        ordersHistory.unshift(hmOrder);
+        modalPayment.classList.add('hidden');
+        updateHistoryBadge();
+
+        // Отправляем на Render
+        sendOrderToServer(
+          hmOrder.item,
+          `Оплата: по договоренности | ${hmOrder.route} | Задача: ${descVal}`,
+          hmOrder.recipient || (telegramUser?.username ? '@' + telegramUser.username : 'Клиент')
+        );
+
+        if (tg?.sendData) {
+          try { tg.sendData(JSON.stringify(hmOrder)); } catch (e) {}
+        }
+
+        showToast(t.toastHmSuccess || 'Заявка на мастера принята!', '🎉');
+        setTimeout(() => { openHistoryModal(); }, 600);
+        return;
+      }
+
+      // 2. ЗАКАЗ АВТОУСЛУГИ
+      if (currentMainTab === 'auto') {
+        const fromVal = document.getElementById('input-auto-from').value.trim();
+        const toVal = document.getElementById('input-auto-to').value.trim();
+        const phoneVal = document.getElementById('input-auto-phone').value.trim();
+        const tgVal = document.getElementById('input-auto-tg').value.trim();
+        const carVal = document.getElementById('input-auto-car').value.trim() || 'Авто';
+        const isSober = currentAutoSubService === 'sober';
+        const serviceName = isSober ? '🍷 Трезвый водитель' : '⚡️ Прикурить авто';
+
+        const autoOrder = {
+          id: orderId,
+          item: `${serviceName} (${carVal})`,
+          price: 0,
+          priceDisplay: t.autoPriceAgreed || 'По договоренности',
+          recipient: `${phoneVal || ''} ${tgVal || ''}`.trim(),
+          payment: 'При встрече (согласовано)',
+          isAuto: true,
+          route: isSober ? `${fromVal} ➔ ${toVal}` : `Локация: ${fromVal}`,
+          status: 'Выезд мастера',
+          date: new Date().toLocaleDateString([], { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+        };
+
+        ordersHistory.unshift(autoOrder);
+        modalPayment.classList.add('hidden');
+        updateHistoryBadge();
+
+        // Отправляем на Render
+        sendOrderToServer(
+          autoOrder.item,
+          `Маршрут: ${autoOrder.route}`,
+          autoOrder.recipient || (telegramUser?.username ? '@' + telegramUser.username : 'Клиент')
+        );
+
+        if (tg?.sendData) {
+          try { tg.sendData(JSON.stringify(autoOrder)); } catch (e) {}
+        }
+
+        showToast(isSober ? (t.toastAutoSuccess || 'Заявка принята!') : (t.toastJumpSuccess || 'Мастер выезжает!'), '🎉');
+        setTimeout(() => { openHistoryModal(); }, 600);
+        return;
+      }
+
+      // 3. ЗАКАЗ PREMIUM ИЛИ STARS
+      const unitPrice = selectedItem.price;
+      const rawTotal = unitPrice * currentQuantity;
+      let discountPercent = 0;
+      if (currentQuantity >= 5) discountPercent = 0.10;
+      else if (currentQuantity >= 3) discountPercent = 0.07;
+      else if (currentQuantity >= 2) discountPercent = 0.05;
+      const discountSum = Math.round((rawTotal * discountPercent) / 100) * 100;
+      const finalPrice = rawTotal - discountSum;
+
+      const itemName = selectedItem.count 
+        ? `${selectedItem.count} Stars${currentQuantity > 1 ? ` (x${currentQuantity})` : ''}` 
+        : `${selectedItem.months}m Premium${currentQuantity > 1 ? ` (x${currentQuantity})` : ''}`;
+
+      const newOrder = {
+        id: orderId,
+        item: itemName,
+        price: finalPrice,
+        quantity: currentQuantity,
+        recipient: inputRecipient.value.trim(),
+        payment: isCard ? 'Uzcard / Humo' : 'Cash On-Site',
+        isVisit: isVisitEnabled,
+        phone: isVisitEnabled ? document.getElementById('input-visit-phone').value.trim() : null,
+        tgNick: isVisitEnabled ? document.getElementById('input-visit-tg').value.trim() : null,
+        location: isVisitEnabled ? document.getElementById('input-visit-location').value.trim() : null,
+        status: isVisitEnabled ? 'Согласование выезда' : 'Ожидает проверки',
+        date: new Date().toLocaleDateString([], { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+      };
+
+      ordersHistory.unshift(newOrder);
+      modalPayment.classList.add('hidden');
+      updateHistoryBadge();
+
+      // Отправляем на Render
+      sendOrderToServer(
+        newOrder.item,
+        `${formatPrice(newOrder.price)} | Оплата: ${newOrder.payment}${newOrder.isVisit ? ' (С выездом)' : ''}`,
+        newOrder.recipient || (telegramUser?.username ? '@' + telegramUser.username : 'Клиент')
+      );
+
+      if (tg?.sendData) {
+        try {
+          tg.sendData(JSON.stringify(newOrder));
+        } catch (e) {}
+      }
+
+      showToast(isVisitEnabled ? t.toastVisitSuccess : t.toastOrderSuccess, '🎉');
+      setTimeout(() => { openHistoryModal(); }, 600);
+    };
+
+    const modalHistory = document.getElementById('modal-history');
+    document.getElementById('btn-orders-history').onclick = openHistoryModal;
+    document.getElementById('btn-close-history').onclick = () => modalHistory.classList.add('hidden');
+
+    function openHistoryModal() {
+      const list = document.getElementById('history-list');
+      list.innerHTML = '';
+      const t = I18N[currentLang];
+
+      if (ordersHistory.length === 0) {
+        list.innerHTML = `<div class="text-center py-10 text-slate-500 text-xs">${t.histEmpty}</div>`;
+      } else {
+        ordersHistory.forEach(o => {
+          const item = document.createElement('div');
+          item.className = 'p-3.5 rounded-2xl bg-[#070b12] border border-amber-500/20 text-xs space-y-1.5';
+          item.innerHTML = `
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-white flex items-center gap-1.5">
+                Заказ #${o.id}
+                ${o.isVisit ? '<span class="text-[9px] bg-amber-500/20 text-amber-300 px-1.5 py-0.2 rounded border border-amber-500/30">VIP Выезд</span>' : ''}
+              </span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${o.isVisit ? 'bg-amber-500/20 text-amber-300' : 'bg-blue-500/20 text-blue-300'} border border-white/10">${o.status}</span>
+            </div>
+            <div class="text-slate-300 text-xs">${o.item} • <strong class="gold-gradient-text">${o.priceDisplay || formatPrice(o.price)}</strong></div>
+            ${o.isVisit ? `<div class="text-[11px] text-slate-400">📞 ${o.phone || ''} | 💬 ${o.tgNick || ''} | 📍 ${o.location || 'г. Ташкент'}</div>` : ''}
+            ${o.route ? `<div class="text-[11px] text-amber-300/90 font-mono">📍 ${o.route}</div>` : ''}
+            <div class="text-[10px] text-slate-500 flex justify-between pt-1 border-t border-slate-800">
+              <span>${o.payment}</span>
+              <span>${o.date}</span>
+            </div>
+          `;
+          list.appendChild(item);
+        });
+      }
+      modalHistory.classList.remove('hidden');
+    }
+
+    function updateHistoryBadge() {
+      const badge = document.getElementById('badge-orders-count');
+      if (ordersHistory.length > 0) {
+        badge.classList.remove('hidden');
+        badge.innerText = ordersHistory.length;
+      }
+    }
+
+    const modalFaq = document.getElementById('modal-faq');
+    document.getElementById('btn-faq').onclick = () => modalFaq.classList.remove('hidden');
+    document.getElementById('btn-close-faq').onclick = () => modalFaq.classList.add('hidden');
+
+    document.getElementById('lang-ru').onclick = () => applyLanguage('ru');
+    document.getElementById('lang-uz').onclick = () => applyLanguage('uz');
+    document.getElementById('lang-en').onclick = () => applyLanguage('en');
+
+    window.addEventListener('click', (e) => {
+      if (e.target === modalPayment) modalPayment.classList.add('hidden');
+      if (e.target === modalHistory) modalHistory.classList.add('hidden');
+      if (e.target === modalFaq) modalFaq.classList.add('hidden');
     });
 
+    // АДМИН-ПАНЕЛЬ
     function openAdminModal() {
       document.getElementById('admin-modal').classList.remove('hidden');
       document.getElementById('admin-auth').classList.remove('hidden');
@@ -307,13 +2500,13 @@
       if (pin === ADMIN_SECRET_PIN) {
         document.getElementById('admin-auth').classList.add('hidden');
         document.getElementById('admin-dashboard').classList.remove('hidden');
-        loadServerOrders();
+        renderAdminOrders();
       } else {
         document.getElementById('admin-pin-error').classList.remove('hidden');
       }
     }
 
-    async function loadServerOrders() {
+    async function renderAdminOrders() {
       const list = document.getElementById('admin-orders-list');
       list.innerHTML = '<div class="p-3 text-center text-slate-400">Связь с сервером Render...</div>';
 
@@ -322,7 +2515,7 @@
         const orders = await res.json();
 
         if (!orders || orders.length === 0) {
-          list.innerHTML = '<div class="p-4 text-center text-slate-500 border border-dashed border-slate-800 rounded-xl">Заказов на сервере пока нет. Оформите тариф, и он появится здесь!</div>';
+          list.innerHTML = '<div class="p-4 text-center text-slate-500 border border-dashed border-slate-800 rounded-xl">Заказов на сервере пока нет.</div>';
           return;
         }
 
@@ -337,24 +2530,235 @@
           </div>
         `).join('');
       } catch (e) {
-        list.innerHTML = '<div class="p-3 text-center text-rose-400">Не удалось загрузить заказы. Проверьте Render.</div>';
+        list.innerHTML = '<div class="p-3 text-center text-rose-400">Не удалось загрузить заказы. Проверьте запущен ли сервис на Render.</div>';
       }
     }
 
-    function changeLang(lang) {
-      const btnRu = document.getElementById('btn-lang-ru');
-      const btnUz = document.getElementById('btn-lang-uz');
-      const sub = document.getElementById('ui-subtitle');
-      if (lang === 'uz') {
-        btnUz.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500 text-slate-950";
-        btnRu.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-800 text-slate-400";
-        sub.innerText = "Premium raqamli xizmatlar va servis";
-      } else {
-        btnRu.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500 text-slate-950";
-        btnUz.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-800 text-slate-400";
-        sub.innerText = "Премиальные цифровые услуги и сервис";
-      }
+    // Тройной клик по логотипу для вызова админки
+    let headerClicks = 0;
+    let headerTimer = null;
+    const headerTrigger = document.getElementById('brand-header-trigger');
+    if (headerTrigger) {
+      headerTrigger.addEventListener('click', () => {
+        headerClicks++;
+        clearTimeout(headerTimer);
+        headerTimer = setTimeout(() => { headerClicks = 0; }, 900);
+        if (headerClicks >= 3) {
+          headerClicks = 0;
+          openAdminModal();
+        }
+      });
     }
+
+    // Анимация звездного неба
+    const starCanvas = document.getElementById('starfield-canvas');
+    if (starCanvas) {
+      const ctx = starCanvas.getContext('2d');
+      let stars = [];
+      let shootingStars = [];
+      let width, height;
+
+      function resizeStarfield() {
+        width = starCanvas.width = window.innerWidth;
+        height = starCanvas.height = window.innerHeight;
+        initStars();
+      }
+
+      function initStars() {
+        stars = [];
+        const count = Math.floor((width * height) / 4500);
+        const starColors = ['#ffffff', '#fffbeb', '#fef08a', '#fde047', '#e0e7ff', '#fae8ff'];
+
+        for (let i = 0; i < count; i++) {
+          stars.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            radius: Math.random() * 1.4 + 0.3,
+            alpha: Math.random() * 0.8 + 0.2,
+            speed: Math.random() * 0.015 + 0.005,
+            color: starColors[Math.floor(Math.random() * starColors.length)],
+            twinkleFactor: Math.random() * Math.PI * 2
+          });
+        }
+      }
+
+      let brandConstellations = [];
+
+      function createShootingStarWithBrand() {
+        const startX = Math.random() * (width * 0.4) + 20;
+        const startY = Math.random() * (height * 0.3) + 40;
+        const angle = Math.PI / 4.2 + (Math.random() * 0.15 - 0.08);
+
+        shootingStars.push({
+          x: startX,
+          y: startY,
+          length: Math.random() * 90 + 70,
+          speed: Math.random() * 6 + 7,
+          angle: angle,
+          opacity: 1,
+          decay: 0.012,
+          hasSpawnedBrand: false,
+          brandSpawnDistance: Math.random() * 120 + 80,
+          traveled: 0
+        });
+      }
+
+      function spawnBrandText(x, y) {
+        brandConstellations.push({
+          text: "✦ M · M · M ✦",
+          x: x,
+          y: y,
+          opacity: 0,
+          phase: 'fadeIn',
+          holdTimer: 0,
+          sparkles: Array.from({ length: 12 }, () => ({
+            ox: (Math.random() - 0.5) * 110,
+            oy: (Math.random() - 0.5) * 35,
+            size: Math.random() * 2 + 1,
+            phase: Math.random() * Math.PI * 2,
+            speed: Math.random() * 0.05 + 0.02
+          }))
+        });
+      }
+
+      let lastShootingStarTime = Date.now();
+
+      function animateStarfield() {
+        ctx.clearRect(0, 0, width, height);
+
+        for (let star of stars) {
+          star.twinkleFactor += star.speed;
+          const currentAlpha = Math.max(0.15, Math.min(1, star.alpha + Math.sin(star.twinkleFactor) * 0.35));
+
+          ctx.beginPath();
+          ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+          ctx.fillStyle = star.color;
+          ctx.globalAlpha = currentAlpha;
+          ctx.shadowBlur = star.radius > 1 ? 6 : 0;
+          ctx.shadowColor = star.color;
+          ctx.fill();
+        }
+
+        const now = Date.now();
+        if (now - lastShootingStarTime > 6500) {
+          createShootingStarWithBrand();
+          lastShootingStarTime = now;
+        }
+
+        for (let i = shootingStars.length - 1; i >= 0; i--) {
+          const s = shootingStars[i];
+          const tailX = s.x - Math.cos(s.angle) * s.length;
+          const tailY = s.y - Math.sin(s.angle) * s.length;
+
+          const grad = ctx.createLinearGradient(tailX, tailY, s.x, s.y);
+          grad.addColorStop(0, 'rgba(245, 158, 11, 0)');
+          grad.addColorStop(0.6, 'rgba(253, 224, 71, ' + (s.opacity * 0.6) + ')');
+          grad.addColorStop(1, 'rgba(255, 255, 255, ' + s.opacity + ')');
+
+          ctx.beginPath();
+          ctx.moveTo(tailX, tailY);
+          ctx.lineTo(s.x, s.y);
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = 2.2;
+          ctx.globalAlpha = s.opacity;
+          ctx.shadowBlur = 12;
+          ctx.shadowColor = '#fbbf24';
+          ctx.stroke();
+
+          const dx = Math.cos(s.angle) * s.speed;
+          const dy = Math.sin(s.angle) * s.speed;
+          s.x += dx;
+          s.y += dy;
+          s.traveled += Math.sqrt(dx * dx + dy * dy);
+          s.opacity -= s.decay;
+
+          if (!s.hasSpawnedBrand && s.traveled > s.brandSpawnDistance && s.x < width - 120 && s.y < height - 100) {
+            s.hasSpawnedBrand = true;
+            spawnBrandText(s.x, s.y);
+          }
+
+          if (s.opacity <= 0 || s.x > width || s.y > height) {
+            shootingStars.splice(i, 1);
+          }
+        }
+
+        for (let i = brandConstellations.length - 1; i >= 0; i--) {
+          const b = brandConstellations[i];
+
+          if (b.phase === 'fadeIn') {
+            b.opacity += 0.035;
+            if (b.opacity >= 1) {
+              b.opacity = 1;
+              b.phase = 'hold';
+              b.holdTimer = 0;
+            }
+          } else if (b.phase === 'hold') {
+            b.holdTimer++;
+            if (b.holdTimer > 120) {
+              b.phase = 'fadeOut';
+            }
+          } else if (b.phase === 'fadeOut') {
+            b.opacity -= 0.02;
+            if (b.opacity <= 0) {
+              brandConstellations.splice(i, 1);
+              continue;
+            }
+          }
+
+          ctx.save();
+          ctx.globalAlpha = b.opacity;
+
+          const auraGrad = ctx.createRadialGradient(b.x, b.y, 5, b.x, b.y, 80);
+          auraGrad.addColorStop(0, 'rgba(245, 158, 11, ' + (b.opacity * 0.25) + ')');
+          auraGrad.addColorStop(1, 'rgba(245, 158, 11, 0)');
+          ctx.fillStyle = auraGrad;
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, 80, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.font = '900 19px "Outfit", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.shadowBlur = 16;
+          ctx.shadowColor = '#f59e0b';
+          ctx.fillStyle = '#fef08a';
+          ctx.fillText(b.text, b.x, b.y);
+
+          ctx.shadowBlur = 4;
+          ctx.shadowColor = '#ffffff';
+          ctx.fillStyle = '#ffffff';
+          ctx.fillText(b.text, b.x, b.y);
+
+          for (let sp of b.sparkles) {
+            sp.phase += sp.speed;
+            const spAlpha = Math.max(0, Math.sin(sp.phase)) * b.opacity;
+            const spX = b.x + sp.ox;
+            const spY = b.y + sp.oy;
+
+            ctx.beginPath();
+            ctx.arc(spX, spY, sp.size, 0, Math.PI * 2);
+            ctx.fillStyle = '#fde047';
+            ctx.globalAlpha = spAlpha;
+            ctx.shadowBlur = 6;
+            ctx.shadowColor = '#fbbf24';
+            ctx.fill();
+          }
+
+          ctx.restore();
+        }
+
+        ctx.globalAlpha = 1;
+        ctx.shadowBlur = 0;
+        requestAnimationFrame(animateStarfield);
+      }
+
+      window.addEventListener('resize', resizeStarfield);
+      resizeStarfield();
+      requestAnimationFrame(animateStarfield);
+    }
+
+    // Инициализация интерфейса
+    applyLanguage('ru');
   </script>
 </body>
 </html>
