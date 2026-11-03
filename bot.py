@@ -1,5 +1,6 @@
 import os
 import asyncio
+import sqlite3
 from datetime import datetime
 from aiohttp import web
 from aiogram import Bot, Dispatcher, types
@@ -13,8 +14,27 @@ MINI_APP_URL = "https://dyadyakomol.github.io/mmm-store-app/"
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
-# База данных заказов в памяти сервера
-ORDERS_DB = []
+DB_FILE = "orders.sqlite3"
+
+def init_db():
+    conn = sqlite3.connect(DB_FILE)
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS orders (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            service TEXT,
+            details TEXT,
+            amount INTEGER DEFAULT 0,
+            contact TEXT,
+            status TEXT DEFAULT 'new',
+            created_at TEXT,
+            order_date TEXT
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+init_db()
 
 @dp.message(CommandStart())
 async def start_cmd(message: types.Message):
@@ -24,51 +44,93 @@ async def start_cmd(message: types.Message):
     await message.answer(
         f"Здравствуйте, {message.from_user.first_name}!\n\n"
         "Добро пожаловать в **M.M.M Store** ✦\n"
-        "Нажмите кнопку ниже, чтобы открыть каталог услуг.",
+        "Нажмите кнопку ниже, чтобы открыть витрину.",
         reply_markup=kb,
         parse_mode="Markdown"
     )
 
-# 1. Прием заказа от приложения
+def extract_amount(details_str):
+    nums = "".join([c for c in details_str if c.isdigit()])
+    return int(nums) if nums else 0
+
+# 1. Прием заказа
 async def handle_new_order(request):
     try:
         data = await request.json()
-        item = {
-            "id": len(ORDERS_DB) + 1,
-            "service": data.get("service", "Товар / Услуга"),
-            "details": data.get("details", "—"),
-            "contact": data.get("contact", "Не указан"),
-            "time": datetime.now().strftime("%d.%m %H:%M")
-        }
-        ORDERS_DB.append(item)
+        service = data.get("service", "Товар / Услуга")
+        details = data.get("details", "—")
+        contact = data.get("contact", "Не указан")
+        amount = extract_amount(details)
+        now = datetime.now()
+        created_at = now.strftime("%d.%m.%Y %H:%M")
+        order_date = now.strftime("%Y-%m-%d")
 
-        # Моментальное уведомление вам в личку
+        conn = sqlite3.connect(DB_FILE)
+        cur = conn.cursor()
+        cur.execute("""
+            INSERT INTO orders (service, details, amount, contact, status, created_at, order_date)
+            VALUES (?, ?, ?, ?, 'new', ?, ?)
+        """, (service, details, amount, contact, created_at, order_date))
+        order_id = cur.lastrowid
+        conn.commit()
+        conn.close()
+
         if ADMIN_ID:
             msg = (
-                f"🚨 **НОВЫЙ ЗАКАЗ В M.M.M STORE!**\n\n"
-                f"📦 **Услуга:** {item['service']}\n"
-                f"💰 **Детали:** {item['details']}\n"
-                f"👤 **Клиент:** {item['contact']}\n"
-                f"🕒 **Время:** {item['time']}"
+                f"🚨 **НОВЫЙ ЗАКАЗ #{order_id}**\n\n"
+                f"📦 **Услуга:** {service}\n"
+                f"💰 **Сумма:** {details}\n"
+                f"👤 **Клиент:** {contact}\n"
+                f"🕒 **Дата:** {created_at}"
             )
             try:
                 await bot.send_message(chat_id=ADMIN_ID, text=msg, parse_mode="Markdown")
             except Exception as err:
                 print(f"Ошибка отправки админу: {err}")
 
+        return web.json_response({"status": "ok", "order_id": order_id}, headers={"Access-Control-Allow-Origin": "*"})
+    except Exception as e:
+        return web.json_response({"status": "error", "message": str(e)}, status=400, headers={"Access-Control-Allow-Origin": "*"})
+
+# 2. Получение списка всех заказов
+async def handle_get_orders(request):
+    conn = sqlite3.connect(DB_FILE)
+    cur = conn.cursor()
+    cur.execute("SELECT id, service, details, amount, contact, status, created_at, order_date FROM orders ORDER BY id DESC")
+    rows = cur.fetchall()
+    conn.close()
+
+    orders = []
+    for r in rows:
+        orders.append({
+            "id": r[0],
+            "service": r[1],
+            "details": r[2],
+            "amount": r[3],
+            "contact": r[4],
+            "status": r[5],
+            "time": r[6],
+            "date": r[7]
+        })
+    return web.json_response(orders, headers={"Access-Control-Allow-Origin": "*"})
+
+# 3. Смена статуса заказа
+async def handle_update_status(request):
+    try:
+        data = await request.json()
+        order_id = data.get("id")
+        new_status = data.get("status")
+
+        conn = sqlite3.connect(DB_FILE)
+        cur = conn.cursor()
+        cur.execute("UPDATE orders SET status = ? WHERE id = ?", (new_status, order_id))
+        conn.commit()
+        conn.close()
         return web.json_response({"status": "ok"}, headers={"Access-Control-Allow-Origin": "*"})
     except Exception as e:
         return web.json_response({"status": "error", "message": str(e)}, status=400, headers={"Access-Control-Allow-Origin": "*"})
 
-# 2. Передача заказов в админ-панель
-async def handle_get_orders(request):
-    return web.json_response(ORDERS_DB, headers={
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "Content-Type"
-    })
-
-# Настройка CORS
-async def handle_cors_options(request):
+async def handle_cors(request):
     return web.Response(headers={
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
@@ -77,11 +139,14 @@ async def handle_cors_options(request):
 
 async def main():
     app = web.Application()
-    app.router.add_get("/", lambda req: web.Response(text="M.M.M Backend Active!"))
+    app.router.add_get("/", lambda req: web.Response(text="M.M.M Store Backend Live!"))
     app.router.add_post("/api/order", handle_new_order)
     app.router.add_get("/api/orders", handle_get_orders)
-    app.router.add_route("OPTIONS", "/api/order", handle_cors_options)
-    app.router.add_route("OPTIONS", "/api/orders", handle_cors_options)
+    app.router.add_post("/api/order/status", handle_update_status)
+    
+    app.router.add_route("OPTIONS", "/api/order", handle_cors)
+    app.router.add_route("OPTIONS", "/api/orders", handle_cors)
+    app.router.add_route("OPTIONS", "/api/order/status", handle_cors)
 
     runner = web.AppRunner(app)
     await runner.setup()
