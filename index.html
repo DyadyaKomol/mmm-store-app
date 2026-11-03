@@ -2745,5 +2745,134 @@
       });
     }
   });
+</script><script>
+  const BACKEND_URL = "https://mmm-store-app.onrender.com";
+  const ADMIN_SECRET_PIN = "7777";
+
+  // Отправка заказа прямо на сервер в облако
+  async function sendOrderToServer(serviceName, details) {
+    let clientContact = "Пользователь Telegram";
+    if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
+      const u = window.Telegram.WebApp.initDataUnsafe.user;
+      clientContact = u.username ? '@' + u.username : `${u.first_name} (ID: ${u.id})`;
+    }
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          service: serviceName,
+          details: details,
+          contact: clientContact
+        })
+      });
+      if (res.ok) {
+        alert("✅ Заказ оформлен! Данные поступили администратору.");
+      }
+    } catch (e) {
+      console.error("Ошибка сети:", e);
+    }
+  }
+
+  // Автоматический перехват старых обработчиков:
+  // 1. Перехват вызова tg.sendData
+  if (window.Telegram?.WebApp) {
+    window.Telegram.WebApp.sendData = function(data) {
+      try {
+        let parsed = JSON.parse(data);
+        sendOrderToServer(parsed.service || parsed.title || "Заказ", parsed.details || parsed.price || "—");
+      } catch (err) {
+        sendOrderToServer("Заказ услуги", data);
+      }
+    };
+  }
+
+  // 2. Универсальный перехват клика по любым кнопкам заказа/оплаты
+  document.addEventListener("click", function(e) {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    
+    const text = btn.innerText.toLowerCase();
+    if (text.includes("купить") || text.includes("оформить") || text.includes("заказать") || text.includes("отправить заявку")) {
+      // Ищем карточку услуги или модалку, в которой была нажата кнопка
+      const card = btn.closest(".bg-slate-900") || btn.closest(".card") || btn.parentElement;
+      const title = card?.querySelector("h3, h2, .font-bold")?.innerText || "Заказ из каталога";
+      const price = card?.querySelector(".text-amber-400, .price")?.innerText || "По запросу";
+      
+      sendOrderToServer(title, price);
+    }
+  });
+
+  function openAdminModal() {
+    const modal = document.getElementById('admin-modal');
+    modal.classList.remove('hidden');
+    document.getElementById('admin-auth').classList.remove('hidden');
+    document.getElementById('admin-dashboard').classList.add('hidden');
+    document.getElementById('admin-pin').value = '';
+    document.getElementById('admin-pin-error').classList.add('hidden');
+  }
+
+  function closeAdminModal() {
+    document.getElementById('admin-modal').classList.add('hidden');
+  }
+
+  function checkAdminPin() {
+    const pin = document.getElementById('admin-pin').value;
+    if (pin === ADMIN_SECRET_PIN) {
+      document.getElementById('admin-auth').classList.add('hidden');
+      document.getElementById('admin-dashboard').classList.remove('hidden');
+      renderAdminOrders();
+    } else {
+      document.getElementById('admin-pin-error').classList.remove('hidden');
+    }
+  }
+
+  // Загрузка заказов с сервера Render
+  async function renderAdminOrders() {
+    const list = document.getElementById('admin-orders-list');
+    list.innerHTML = '<div class="p-3 text-center text-slate-400">Связь с сервером Render...</div>';
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/orders`);
+      const orders = await res.json();
+
+      if (!orders || orders.length === 0) {
+        list.innerHTML = '<div class="p-4 text-center text-slate-500 border border-dashed border-slate-800 rounded-xl">Заказов на сервере пока нет. Оформите заказ, и он появится здесь!</div>';
+        return;
+      }
+
+      list.innerHTML = orders.slice().reverse().map((o) => `
+        <div class="p-3 bg-slate-800 border border-slate-700/80 rounded-xl space-y-1">
+          <div class="flex justify-between font-bold text-amber-300">
+            <span>#${o.id} ${o.service}</span>
+            <span class="text-slate-400 font-normal">${o.time}</span>
+          </div>
+          <div class="text-slate-200">Детали: <b>${o.details}</b></div>
+          <div class="text-slate-400">Клиент: ${o.contact}</div>
+        </div>
+      `).join('');
+    } catch (e) {
+      list.innerHTML = '<div class="p-3 text-center text-rose-400">Не удалось связаться с сервером. Убедитесь, что сервис на Render активен.</div>';
+    }
+  }
+
+  // Тройной клик по шапке для открытия админки
+  let headerClicks = 0;
+  let clickResetTimer = null;
+  document.addEventListener('DOMContentLoaded', () => {
+    const header = document.querySelector('header');
+    if (header) {
+      header.addEventListener('click', () => {
+        headerClicks++;
+        clearTimeout(clickResetTimer);
+        clickResetTimer = setTimeout(() => { headerClicks = 0; }, 1000);
+        if (headerClicks >= 3) {
+          headerClicks = 0;
+          openAdminModal();
+        }
+      });
+    }
+  });
 </script></script>
 </html>
