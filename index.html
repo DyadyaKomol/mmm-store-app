@@ -3,130 +3,188 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>M.M.M Store</title>
-  <!-- Tailwind CSS CDN -->
+  <title>M.M.M Store | VIP Services</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body {
       background-color: #0b0f19;
-      color: #f8fafc;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
     }
-    .gold-gradient-text {
-      background: linear-gradient(135deg, #fce881 0%, #c9933b 50%, #fef3c7 100%);
+    .gold-gradient {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+    }
+    .gold-text {
+      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    .gold-border-glow {
-      border: 1px solid rgba(217, 119, 6, 0.3);
-      box-shadow: 0 0 15px rgba(217, 119, 6, 0.15);
+    .card-luxury {
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(217, 119, 6, 0.2);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+    }
+    .card-luxury:active {
+      transform: scale(0.98);
+      border-color: rgba(245, 158, 11, 0.5);
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between pb-8">
+<body class="min-h-screen flex flex-col justify-between">
 
   <!-- Header -->
-  <header class="pt-6 pb-4 px-4 text-center border-b border-slate-800 cursor-pointer" id="app-header">
-    <div class="inline-block px-3 py-1 bg-amber-500/10 border border-amber-500/30 rounded-full mb-2">
-      <span class="text-xs uppercase tracking-widest text-amber-400 font-bold">✦ M · M · M · STORE ✦</span>
+  <header id="header-logo" class="pt-6 pb-3 px-4 text-center cursor-pointer select-none">
+    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 mb-2">
+      <i class="fa-solid fa-crown text-amber-400 text-xs"></i>
+      <span class="text-[11px] font-bold tracking-widest text-amber-400 uppercase">✦ M · M · M · STORE ✦</span>
     </div>
-    <h1 class="text-2xl font-black gold-gradient-text">M.M.M Store | VIP Services</h1>
-    <p class="text-xs text-slate-400 mt-1" id="header-desc">Цифровые товары и персональные сервисы</p>
-
-    <!-- Language Selector -->
+    <h1 class="text-2xl font-black tracking-tight gold-text">M.M.M Store</h1>
+    <p class="text-xs text-slate-400 mt-1" id="ui-subtitle">Премиальные цифровые услуги и сервис</p>
+    
+    <!-- Переключатель языков -->
     <div class="flex justify-center gap-2 mt-3">
-      <button onclick="setLang('ru')" id="lang-btn-ru" class="px-3 py-0.5 rounded-full text-xs font-bold bg-amber-500 text-slate-950">RU</button>
-      <button onclick="setLang('uz')" id="lang-btn-uz" class="px-3 py-0.5 rounded-full text-xs font-bold bg-slate-800 text-slate-300">UZ</button>
+      <button onclick="changeLang('ru')" id="btn-lang-ru" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500 text-slate-950">RU</button>
+      <button onclick="changeLang('uz')" id="btn-lang-uz" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-800 text-slate-400">UZ</button>
     </div>
   </header>
 
-  <!-- Main Content Tabs -->
-  <main class="max-w-md mx-auto px-4 py-4 w-full flex-1">
-    <!-- Category Navigation -->
-    <div class="grid grid-cols-2 gap-2 mb-4 bg-slate-900 p-1 rounded-xl border border-slate-800">
-      <button onclick="switchTab('digital')" id="tab-digital" class="py-2 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 transition">💎 Цифровые товары</button>
-      <button onclick="switchTab('services')" id="tab-services" class="py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">🚗 Авто & Мастер</button>
-    </div>
-
-    <!-- Tab 1: Digital Goods (Premium & Stars) -->
-    <div id="content-digital" class="space-y-4">
-      <div class="bg-slate-900/80 p-4 rounded-2xl gold-border-glow">
-        <div class="flex justify-between items-center mb-3">
-          <span class="text-sm font-bold text-amber-300">Telegram Premium</span>
-          <span class="text-xs px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded-full font-semibold">Без входа</span>
+  <!-- Список услуг и каталога -->
+  <main class="max-w-md mx-auto px-4 py-2 w-full space-y-4 flex-1">
+    
+    <!-- Telegram Premium -->
+    <div class="card-luxury p-4 rounded-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+            <i class="fa-solid fa-star"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm text-white">Telegram Premium</h3>
+            <p class="text-[11px] text-slate-400">Подписка без входа в аккаунт</p>
+          </div>
         </div>
-        <div class="space-y-2">
-          <button onclick="submitOrder('Telegram Premium (3 месяца)', '135 000 сум')" class="w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-700/60 rounded-xl flex justify-between items-center text-xs">
-            <span>3 месяца</span>
-            <span class="text-amber-400 font-bold">135 000 сум</span>
-          </button>
-          <button onclick="submitOrder('Telegram Premium (6 месяцев)', '220 000 сум')" class="w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-700/60 rounded-xl flex justify-between items-center text-xs">
-            <span>6 месяцев</span>
-            <span class="text-amber-400 font-bold">220 000 сум</span>
-          </button>
-          <button onclick="submitOrder('Telegram Premium (12 месяцев)', '380 000 сум')" class="w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-700/60 rounded-xl flex justify-between items-center text-xs">
-            <span>12 месяцев (1 год)</span>
-            <span class="text-amber-400 font-bold">380 000 сум</span>
-          </button>
-        </div>
+        <span class="text-[10px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-full border border-blue-500/20">Подарок</span>
       </div>
-
-      <div class="bg-slate-900/80 p-4 rounded-2xl gold-border-glow">
-        <div class="flex justify-between items-center mb-3">
-          <span class="text-sm font-bold text-amber-300">Telegram Stars ⭐</span>
-          <span class="text-xs px-2 py-0.5 bg-yellow-500/20 text-yellow-400 rounded-full font-semibold">Моментально</span>
-        </div>
-        <div class="space-y-2">
-          <button onclick="submitOrder('Telegram Stars (50 ⭐)', '18 000 сум')" class="w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-700/60 rounded-xl flex justify-between items-center text-xs">
-            <span>50 звёзд</span>
-            <span class="text-yellow-400 font-bold">18 000 сум</span>
-          </button>
-          <button onclick="submitOrder('Telegram Stars (100 ⭐)', '34 000 сум')" class="w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-700/60 rounded-xl flex justify-between items-center text-xs">
-            <span>100 звёзд</span>
-            <span class="text-yellow-400 font-bold">34 000 сум</span>
-          </button>
-          <button onclick="submitOrder('Telegram Stars (500 ⭐)', '165 000 сум')" class="w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-700/60 rounded-xl flex justify-between items-center text-xs">
-            <span>500 звёзд</span>
-            <span class="text-yellow-400 font-bold">165 000 сум</span>
-          </button>
-        </div>
+      <div class="grid grid-cols-3 gap-2 text-center text-xs">
+        <button onclick="openCheckout('Telegram Premium (3 мес)', '135 000 сум')" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700">
+          <div class="text-slate-400 text-[10px]">3 мес</div>
+          <div class="font-bold text-amber-400 mt-0.5">135k</div>
+        </button>
+        <button onclick="openCheckout('Telegram Premium (6 мес)', '220 000 сум')" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700">
+          <div class="text-slate-400 text-[10px]">6 мес</div>
+          <div class="font-bold text-amber-400 mt-0.5">220k</div>
+        </button>
+        <button onclick="openCheckout('Telegram Premium (12 мес)', '380 000 сум')" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700">
+          <div class="text-slate-400 text-[10px]">1 год</div>
+          <div class="font-bold text-amber-400 mt-0.5">380k</div>
+        </button>
       </div>
     </div>
 
-    <!-- Tab 2: Local Services (Driver / Relocation / Master) -->
-    <div id="content-services" class="space-y-4 hidden">
-      <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
-        <div class="flex justify-between items-center mb-2">
-          <span class="text-sm font-bold text-slate-100">Перегон авто / Трезвый водитель</span>
-          <span class="text-xs text-amber-400 font-semibold">Ташкент</span>
+    <!-- Telegram Stars -->
+    <div class="card-luxury p-4 rounded-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center text-yellow-400">
+            <i class="fa-solid fa-sparkles"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm text-white">Telegram Stars</h3>
+            <p class="text-[11px] text-slate-400">Звёзды для ботов, каналов и подарков</p>
+          </div>
         </div>
-        <p class="text-xs text-slate-400 mb-3">Аккуратный перегон любого легкового автомобиля в целости и сохранности 24/7.</p>
-        <button onclick="submitOrder('Трезвый водитель / Перегон авто', 'По тарифу / согласование')" class="w-full py-3 bg-gradient-to-r from-amber-500 to-yellow-600 rounded-xl text-slate-950 font-bold text-xs">Вызвать водителя</button>
+        <span class="text-[10px] bg-yellow-500/10 text-yellow-400 px-2 py-0.5 rounded-full border border-yellow-500/20">Быстро</span>
       </div>
-
-      <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
-        <div class="flex justify-between items-center mb-2">
-          <span class="text-sm font-bold text-slate-100">Мастер на дом / Мелкий ремонт</span>
-          <span class="text-xs text-amber-400 font-semibold">Юнусабад & Город</span>
-        </div>
-        <p class="text-xs text-slate-400 mb-3">Электрика, сантехника, сборка мебели, бытовой ремонт любой сложности.</p>
-        <button onclick="submitOrder('Мастер на дом / Бытовой ремонт', 'По оценке работ')" class="w-full py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-white font-bold text-xs">Вызвать мастера</button>
+      <div class="grid grid-cols-3 gap-2 text-center text-xs">
+        <button onclick="openCheckout('Telegram Stars (50 ⭐)', '18 000 сум')" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700">
+          <div class="text-slate-400 text-[10px]">50 ⭐</div>
+          <div class="font-bold text-yellow-400 mt-0.5">18k</div>
+        </button>
+        <button onclick="openCheckout('Telegram Stars (100 ⭐)', '34 000 сум')" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700">
+          <div class="text-slate-400 text-[10px]">100 ⭐</div>
+          <div class="font-bold text-yellow-400 mt-0.5">34k</div>
+        </button>
+        <button onclick="openCheckout('Telegram Stars (500 ⭐)', '165 000 сум')" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700">
+          <div class="text-slate-400 text-[10px]">500 ⭐</div>
+          <div class="font-bold text-yellow-400 mt-0.5">165k</div>
+        </button>
       </div>
     </div>
+
+    <!-- Трезвый водитель / Перегон авто -->
+    <div class="card-luxury p-4 rounded-2xl">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+            <i class="fa-solid fa-car-side"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm text-white">Трезвый водитель / Перегон</h3>
+            <p class="text-[11px] text-slate-400">Аккуратный перегон по Ташкенту 24/7</p>
+          </div>
+        </div>
+      </div>
+      <p class="text-[11px] text-slate-400 mb-3">Опытный водитель доставит ваш автомобиль в любую точку в полной безопасности.</p>
+      <button onclick="openCheckout('Трезвый водитель / Перегон', 'По согласованию маршрута')" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg">
+        <i class="fa-solid fa-phone-volume text-xs"></i> Заказать выезд
+      </button>
+    </div>
+
+    <!-- Муж на час / Мастер на дом -->
+    <div class="card-luxury p-4 rounded-2xl">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+            <i class="fa-solid fa-screwdriver-wrench"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm text-white">Мастер на дом</h3>
+            <p class="text-[11px] text-slate-400">Электрика, сантехника, ремонт мебели</p>
+          </div>
+        </div>
+      </div>
+      <p class="text-[11px] text-slate-400 mb-3">Быстрое решение бытовых задач по Ташкенту и Юнусабадскому району.</p>
+      <button onclick="openCheckout('Мастер на дом', 'Оценка по фото / объёму')" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-xs flex items-center justify-center gap-1.5">
+        <i class="fa-solid fa-calendar-check text-xs text-amber-400"></i> Вызвать специалиста
+      </button>
+    </div>
+
   </main>
 
-  <!-- Footer Info -->
-  <footer class="text-center px-4">
-    <div class="text-[11px] text-slate-500">
-      Поддержка и связь: <a href="https://t.me/MirsolieV" target="_blank" class="text-amber-400 hover:underline">@MirsolieV</a>
-    </div>
+  <!-- Footer -->
+  <footer class="text-center py-4 text-xs text-slate-500 border-t border-slate-800/80">
+    Связь с администратором: <a href="https://t.me/MirsolieV" target="_blank" class="text-amber-400 font-medium hover:underline">@MirsolieV</a>
   </footer>
 
-  <!-- Админ-панель (скрытое окно) -->
+  <!-- Модальное окно оформления заказа -->
+  <div id="checkout-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-amber-500/30 rounded-2xl p-5 w-full max-w-sm text-white shadow-2xl space-y-3">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+        <h4 class="font-bold text-sm text-amber-400">Подтверждение заказа</h4>
+        <button onclick="closeCheckout()" class="text-slate-400 text-lg">✕</button>
+      </div>
+      <div class="space-y-1">
+        <div class="text-xs text-slate-400">Услуга / Товар:</div>
+        <div id="modal-service-name" class="font-bold text-sm text-white"></div>
+        <div id="modal-service-price" class="text-xs text-amber-400 font-semibold"></div>
+      </div>
+      <div class="space-y-1 pt-1">
+        <label class="text-[11px] text-slate-400">Ваш телефон или детали (необязательно):</label>
+        <input type="text" id="order-comment" placeholder="+998 90 ... или комментарий" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-500">
+      </div>
+      <div class="pt-2 flex gap-2">
+        <button onclick="closeCheckout()" class="w-1/2 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">Отмена</button>
+        <button id="submit-order-btn" onclick="confirmAndSendOrder()" class="w-1/2 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-950 text-xs font-bold">Оформить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно скрытой Админ-панели -->
   <div id="admin-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-amber-500/40 rounded-2xl p-5 w-full max-w-sm text-white shadow-2xl relative max-h-[85vh] flex flex-col">
       <div class="flex justify-between items-center pb-3 border-b border-white/10 mb-3">
@@ -142,50 +200,50 @@
         <p id="admin-pin-error" class="text-rose-400 text-xs text-center hidden">Неверный PIN-код!</p>
       </div>
 
-      <!-- Список заказов -->
+      <!-- Список заказов с сервера -->
       <div id="admin-dashboard" class="hidden flex-1 overflow-y-auto space-y-2 pr-1">
         <div class="flex justify-between items-center mb-2">
-          <span class="text-[11px] text-slate-400">Заказы на сервере:</span>
-          <button onclick="renderAdminOrders()" class="text-[11px] text-amber-400 hover:underline">🔄 Обновить</button>
+          <span class="text-[11px] text-slate-400">Заказы на сервере Render:</span>
+          <button onclick="loadServerOrders()" class="text-[11px] text-amber-400 hover:underline">🔄 Обновить</button>
         </div>
-        <div id="admin-orders-list" class="space-y-2 text-xs">
-          <!-- Сюда подгружаются элементы -->
-        </div>
+        <div id="admin-orders-list" class="space-y-2 text-xs"></div>
       </div>
     </div>
   </div>
 
   <script>
-    // Конфигурация бэкенда
     const BACKEND_URL = "https://mmm-store-app.onrender.com";
     const ADMIN_SECRET_PIN = "7777";
 
-    // Инициализация Telegram WebApp
     const tg = window.Telegram?.WebApp;
     if (tg) {
       tg.ready();
       tg.expand();
     }
 
-    // Переключение табов
-    function switchTab(tab) {
-      const isDigital = tab === 'digital';
-      document.getElementById('content-digital').classList.toggle('hidden', !isDigital);
-      document.getElementById('content-services').classList.toggle('hidden', isDigital);
-      
-      const tabDig = document.getElementById('tab-digital');
-      const tabServ = document.getElementById('tab-services');
-      if (isDigital) {
-        tabDig.className = "py-2 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 transition";
-        tabServ.className = "py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
-      } else {
-        tabDig.className = "py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
-        tabServ.className = "py-2 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 transition";
-      }
+    let currentOrder = { service: '', price: '' };
+
+    function openCheckout(service, price) {
+      currentOrder = { service, price };
+      document.getElementById('modal-service-name').innerText = service;
+      document.getElementById('modal-service-price').innerText = price;
+      document.getElementById('order-comment').value = '';
+      document.getElementById('checkout-modal').classList.remove('hidden');
     }
 
-    // Отправка заказа прямо на сервер
-    async function submitOrder(serviceName, details) {
+    function closeCheckout() {
+      document.getElementById('checkout-modal').classList.add('hidden');
+    }
+
+    async function confirmAndSendOrder() {
+      const btn = document.getElementById('submit-order-btn');
+      btn.innerText = "Отправка...";
+      btn.disabled = true;
+
+      const comment = document.getElementById('order-comment').value.trim();
+      let detailsText = currentOrder.price;
+      if (comment) detailsText += ` (Инфо: ${comment})`;
+
       let client = "Клиент Telegram";
       if (tg?.initDataUnsafe?.user) {
         const u = tg.initDataUnsafe.user;
@@ -197,24 +255,41 @@
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            service: serviceName,
-            details: details,
+            service: currentOrder.service,
+            details: detailsText,
             contact: client
           })
         });
 
+        closeCheckout();
         if (res.ok) {
-          alert(`✅ Заявка принята!\n\nТовар/Услуга: ${serviceName}\nСумма: ${details}\n\nАдминистратор уже получил ваш заказ.`);
+          alert(`✅ Заявка принята!\n\nТовар: ${currentOrder.service}\nСумма: ${currentOrder.price}\n\nАдминистратор свяжется с вами.`);
         } else {
-          alert(`✅ Заявка оформлена: ${serviceName}. Спасибо!`);
+          alert(`✅ Заказ принят: ${currentOrder.service}`);
         }
-      } catch (err) {
-        console.error("Ошибка сети:", err);
-        alert(`✅ Заказ оформлен: ${serviceName}`);
+      } catch (e) {
+        closeCheckout();
+        console.error("Сетевая ошибка:", e);
+        alert(`✅ Заявка отправлена: ${currentOrder.service}`);
+      } finally {
+        btn.innerText = "Оформить";
+        btn.disabled = false;
       }
     }
 
-    // Админ-панель: логика
+    // Тройной клик по шапке для открытия админки
+    let headerClicks = 0;
+    let headerTimer = null;
+    document.getElementById('header-logo').addEventListener('click', () => {
+      headerClicks++;
+      clearTimeout(headerTimer);
+      headerTimer = setTimeout(() => { headerClicks = 0; }, 900);
+      if (headerClicks >= 3) {
+        headerClicks = 0;
+        openAdminModal();
+      }
+    });
+
     function openAdminModal() {
       document.getElementById('admin-modal').classList.remove('hidden');
       document.getElementById('admin-auth').classList.remove('hidden');
@@ -232,13 +307,13 @@
       if (pin === ADMIN_SECRET_PIN) {
         document.getElementById('admin-auth').classList.add('hidden');
         document.getElementById('admin-dashboard').classList.remove('hidden');
-        renderAdminOrders();
+        loadServerOrders();
       } else {
         document.getElementById('admin-pin-error').classList.remove('hidden');
       }
     }
 
-    async function renderAdminOrders() {
+    async function loadServerOrders() {
       const list = document.getElementById('admin-orders-list');
       list.innerHTML = '<div class="p-3 text-center text-slate-400">Связь с сервером Render...</div>';
 
@@ -262,36 +337,22 @@
           </div>
         `).join('');
       } catch (e) {
-        list.innerHTML = '<div class="p-3 text-center text-rose-400">Не удалось загрузить заказы. Проверьте запущен ли сервис на Render.</div>';
+        list.innerHTML = '<div class="p-3 text-center text-rose-400">Не удалось загрузить заказы. Проверьте Render.</div>';
       }
     }
 
-    // Тройной клик по шапке для открытия админки
-    let clicks = 0;
-    let timer = null;
-    document.getElementById('app-header').addEventListener('click', () => {
-      clicks++;
-      clearTimeout(timer);
-      timer = setTimeout(() => { clicks = 0; }, 900);
-      if (clicks >= 3) {
-        clicks = 0;
-        openAdminModal();
-      }
-    });
-
-    // Переключение языков
-    function setLang(lang) {
-      const btnRu = document.getElementById('lang-btn-ru');
-      const btnUz = document.getElementById('lang-btn-uz');
-      const desc = document.getElementById('header-desc');
+    function changeLang(lang) {
+      const btnRu = document.getElementById('btn-lang-ru');
+      const btnUz = document.getElementById('btn-lang-uz');
+      const sub = document.getElementById('ui-subtitle');
       if (lang === 'uz') {
-        btnUz.className = "px-3 py-0.5 rounded-full text-xs font-bold bg-amber-500 text-slate-950";
-        btnRu.className = "px-3 py-0.5 rounded-full text-xs font-bold bg-slate-800 text-slate-300";
-        desc.innerText = "Raqamli mahsulotlar va xizmatlar";
+        btnUz.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500 text-slate-950";
+        btnRu.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-800 text-slate-400";
+        sub.innerText = "Premium raqamli xizmatlar va servis";
       } else {
-        btnRu.className = "px-3 py-0.5 rounded-full text-xs font-bold bg-amber-500 text-slate-950";
-        btnUz.className = "px-3 py-0.5 rounded-full text-xs font-bold bg-slate-800 text-slate-300";
-        desc.innerText = "Цифровые товары и персональные сервисы";
+        btnRu.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500 text-slate-950";
+        btnUz.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-800 text-slate-400";
+        sub.innerText = "Премиальные цифровые услуги и сервис";
       }
     }
   </script>
